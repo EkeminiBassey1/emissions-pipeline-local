@@ -1,0 +1,13 @@
+project: 
+  project_id: wgs-emission-data-dev
+  dataset_id: emissions_testing
+  table_base_coors: base_coors
+  table_base_coors_wr_kilometriert: base_coors_wr_kilometriert
+  table_routen_plz: routen_plz
+  table_error: error_base_coors_wr_kilometriert
+  batch_size: 500
+url: 
+  wr_url_direct_route: http://rout-routes-cmp.prod.lkw-walter.com/gisl-routes-cmp/api/calculateDirectRoute
+  wr_url_walter_route: http://rout-routes-cmp.prod.lkw-walter.com/gisl-routes-cmp/api/calculateWalterRoute
+credentials:
+  credential: service_account.Credentials.from_service_account_file(key_path, scopes=["https://www.googleapis.com/auth/bigquery","https://www.googleapis.com/auth/pubsub", "https://www.googleapis.com/auth/cloud-platform"])
