@@ -8,13 +8,16 @@ from src.emissions_pipeline.data_transformation.routen_plz_upload import RoutenP
 from src.emissions_pipeline.data_loading.run_sql_query import RunQueries
 
 @click.command()
+@click.option("-i", "--input_file_path", help="The input file of the area codes", type=str, required=True)
 @click.option("-k", "--key_file", help="Location of the key file to use", type=str, required=True)
-def main(key_file):
+@click.option("-n", "--name_file", help="The name of the file", type=str, required=True)
+@click.option("-o", "--output_file_path", help="Location of where the file will be stored", type=str, required=True)
+def main(input_file_path, key_file, output_file_path, name_file):
     project_data = yaml.safe_load(open('config.yaml'))
-    data_transformation = BaseCoors()
+    data_transformation = BaseCoors(name=name_file, output_path=output_file_path)
     run_queries = RunQueries(key_file)
-    upload_routen_plz = RoutenPLZ(key_file=key_file, excel_file_path=project_data['input']['file_path_input'])
-    
+    upload_routen_plz = RoutenPLZ(key_file=key_file, excel_file_path=input_file_path)
+  
     credentials = service_account.Credentials.from_service_account_file(
         key_file, 
         scopes=["https://www.googleapis.com/auth/bigquery",

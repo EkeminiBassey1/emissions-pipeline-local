@@ -11,15 +11,15 @@ import logging
 
 
 class BaseCoors:
-    def __init__(self):
+    def __init__(self, name, output_path):
         project_data = yaml.safe_load(open('config.yaml'))
         self.project_id = project_data['project']['project_id']
         self.dataset_id = project_data['project']['dataset_id']    
         self.base_coors = project_data['project']['table_base_coors']
         self.routen_plz = project_data['project']['table_routen_plz']
         self.table_view_xlsx = project_data['project']['table_view']
-        self.file_path = project_data['output']['file_path']
-        self.file_name = project_data['output']['file_name']
+        self.file_path_output = output_path
+        self.file_name = name
 
     def loading_bq_table_base_coors(self):
         """
@@ -66,7 +66,7 @@ class BaseCoors:
         dt_string = dt.strftime("%Y_%m_%d_%H_%M_%S")
 
         file_name = f"{self.file_name}_{dt_string}.xlsx"
-        local_file_path = f"{self.file_path}/{file_name}"
+        local_file_path = f"{self.file_path_output}/{file_name}"
 
         query = f"SELECT * FROM `{destination_table}`"
 

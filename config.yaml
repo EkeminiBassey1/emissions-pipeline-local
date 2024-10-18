@@ -10,8 +10,3 @@ project:
 url: 
   wr_url_direct_route: http://rout-routes-cmp.prod.lkw-walter.com/gisl-routes-cmp/api/calculateDirectRoute
   wr_url_walter_route: http://rout-routes-cmp.prod.lkw-walter.com/gisl-routes-cmp/api/calculateWalterRoute
-output:
-  file_path: C:/Users/bassey/Downloads/
-  file_name: "Output_excel_file" 
-input: 
-  file_path_input: C:/Users/bassey/Downloads/area_code_file.xlsx
