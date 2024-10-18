@@ -1,7 +1,8 @@
 from google.cloud import bigquery
 from google.oauth2 import service_account
-
+from loguru import logger
 import yaml
+
 
 class BigQuery:
     def __init__(self, key_file):
@@ -95,10 +96,11 @@ class BigQuery:
             bigquery.SchemaField("anzahlGefundenerRouten", "INTEGER", mode="NULLABLE")
         ]
 
-        self.client.get_table(table_ref) 
         dataset_ref = self.client.dataset(self.dataset_id)
         table_ref = dataset_ref.table(self.base_coors_wr_k)
-
-        table = bigquery.Table(table_ref, schema=schema)
-        table = self.client.create_table(table)
-        print(f"Table {self.project_id}.{self.dataset_id}.{self.base_coors_wr_k} created!")
+        try: 
+            table = bigquery.Table(table_ref, schema=schema)
+            table = self.client.create_table(table)
+            logger.success(f"Table {self.project_id}.{self.dataset_id}.{self.base_coors_wr_k} created!")
+        except: 
+            logger.error(f"Table {self.project_id}.{self.dataset_id}.{self.base_coors_wr_k} could not be created!")
