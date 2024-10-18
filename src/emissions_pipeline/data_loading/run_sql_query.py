@@ -1,34 +1,48 @@
 import os
+import yaml
+import importlib.resources
+import src.util.sql as queries_dh
+import src.util.view as queries_view
 from google.cloud import bigquery
+from google.oauth2 import service_account
+from loguru import logger
 
 
-client = bigquery.Client()
+class RunQueries: 
+    def __init__(self, key_file): 
+        folder_path_sql = 'src/util/sql'
+        folder_path_view = 'src/util/view'
+        
+        self.file_names = [f for f in os.listdir(folder_path_sql) if f.endswith('.sql') and os.path.isfile(os.path.join(folder_path_sql, f)) and f != '__init__.sql']
+        self.file_names_view = [f for f in os.listdir(folder_path_view) if f.endswith('.sql') and os.path.isfile(os.path.join(folder_path_view, f)) and f != '__init__.sql']
 
-sql_folder_path = 'path/to/your/sql_folder'
+        project_data = yaml.safe_load(open('config.yaml'))
+        credentials = service_account.Credentials.from_service_account_file(
+            key_file, 
+            scopes=["https://www.googleapis.com/auth/bigquery",
+                    "https://www.googleapis.com/auth/pubsub", 
+                    "https://www.googleapis.com/auth/cloud-platform"]
+        )
+        self.client = bigquery.Client(credentials=credentials, project=project_data['project']['project_id'])
 
-def execute_all_sql_queries(folder_path, project_id, dataset_id):
-    for filename in os.listdir(folder_path):
-        if filename.endswith('.sql'):
-            file_path = os.path.join(folder_path, filename)
-            with open(file_path, 'r') as sql_file:
-                sql_query = sql_file.read()
+    def run_queries_on_bg(self):
+        for name in self.file_names:
+            query = importlib.resources.read_text(queries_dh, name)  
+            
+            logger.info(query)  
+            query_job = self.client.query(query)
 
-                try:
-                    print(f"Executing query from file: {filename}")
-                    query_job = client.query(sql_query)
-                    result = query_job.result()  # Wait for the job to complete                    
-                    print(f"Query from {filename} executed successfully.")
-                    
-                    for row in result:
-                        print(row)
-                    
-                except Exception as e:
-                    print(f"Error executing query from {filename}: {e}")
+            results = query_job.result()
+            logger.info(f"{name} has been created.")
+    
+    def run_queries_view(self): 
+        for name in self.file_names_view:
+            
+            print(self.file_names_view)
+            query = importlib.resources.read_text(queries_view, name)  
+            
+            logger.info(query)  
+            query_job = self.client.query(query)
 
-if __name__ == '__main__':
-    # Replace with your project and dataset details
-    project_id = 'your_project_id'
-    dataset_id = 'your_dataset_id'
-
-    # Run all SQL queries in the specified folder
-    execute_all_sql_queries(sql_folder_path, project_id, dataset_id)
+            results = query_job.result()
+            logger.info(f"{name} has been created.")

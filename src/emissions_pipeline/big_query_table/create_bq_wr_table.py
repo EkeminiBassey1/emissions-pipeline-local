@@ -1,4 +1,6 @@
 from google.cloud import bigquery
+from google.oauth2 import service_account
+
 import yaml
 
 class BigQuery:
@@ -6,15 +8,16 @@ class BigQuery:
         project_data = yaml.safe_load(open('config.yaml'))
         self.project_id = project_data['project']['project_id']
         self.dataset_id = project_data['project']['dataset_id']    
-        self.base_coors = project_data['project']['table_base_coors']
-        self.routen_plz = project_data['project']['table_routen_plz']
-        self.file_path = project_data['output']['file_path']
-        self.file_name = project_data['output']['file_name']
-        credential_template = project_data['credentials']['credential']
-        self.credentials = eval(credential_template.replace("key_path", f'"{key_file}"'))
-    
-    def create_bigquery_table():
-        client = bigquery.Client(project=self.project_id, credentials=self.credentials)
+        self.base_coors_wr_k = project_data['project']['table_base_coors_wr_kilometriert']
+        credentials = service_account.Credentials.from_service_account_file(
+            key_file, 
+            scopes=["https://www.googleapis.com/auth/bigquery",
+                    "https://www.googleapis.com/auth/pubsub", 
+                    "https://www.googleapis.com/auth/cloud-platform"]
+        )
+        self.client = bigquery.Client(credentials=credentials, project=project_data['project']['project_id'])
+
+    def create_bigquery_table(self):
 
         schema = [
             bigquery.SchemaField("ID", "STRING", mode="NULLABLE"),
@@ -92,9 +95,10 @@ class BigQuery:
             bigquery.SchemaField("anzahlGefundenerRouten", "INTEGER", mode="NULLABLE")
         ]
 
-        dataset_ref = client.dataset(self.dataset_id)
-        table_ref = dataset_ref.table(self.table_id)
+        self.client.get_table(table_ref) 
+        dataset_ref = self.client.dataset(self.dataset_id)
+        table_ref = dataset_ref.table(self.base_coors_wr_k)
 
         table = bigquery.Table(table_ref, schema=schema)
-        table = client.create_table(table)
-        print(f"Table {self.project_id}.{self.dataset_id}.{self.table_id} created!")
+        table = self.client.create_table(table)
+        print(f"Table {self.project_id}.{self.dataset_id}.{self.base_coors_wr_k} created!")

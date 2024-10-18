@@ -5,7 +5,7 @@ import aiohttp
 from loguru import logger
 
 from src.emissions_pipeline.data_intergration.apiRequestManager import ApiRequestManager
-from emissions_pipeline.model.preparing_area_code_dataframe import uploading_area_code_dataframe 
+from src.emissions_pipeline.model.preparing_area_code_dataframe import uploading_area_code_dataframe 
 
 api_manager = ApiRequestManager()
 featureparameter = api_manager.set_featureParameter(maut=True)
