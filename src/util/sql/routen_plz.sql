@@ -1,4 +1,4 @@
-CREATE OR REPLACE TABLE `wgs-emission-data-dev.emissions_testing.routen_plz` (
+CREATE OR REPLACE TABLE `{$project_id}.{$dataset_id}.routen_plz` (
     Land_von STRING,
     PLZ_von STRING,
     Land_nach STRING,

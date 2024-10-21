@@ -1,4 +1,4 @@
-CREATE OR REPLACE TABLE `wgs-emission-data-dev.emissions_testing.base_coors`
+CREATE OR REPLACE TABLE `{$project_id}.{$dataset_id}.base_coors`
 (
     ID        STRING,
     Land_von  STRING,

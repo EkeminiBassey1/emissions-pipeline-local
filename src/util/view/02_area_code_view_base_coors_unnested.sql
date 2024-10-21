@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW wgs-emission-data-dev.emissions_testing.base_coors_wr_kilometriert_excel_file AS
+CREATE OR REPLACE VIEW `{$project_id}.{$dataset_id}.base_coors_wr_kilometriert_excel_file` AS
 SELECT
   ID,
   Land_von,
@@ -51,7 +51,7 @@ SELECT
   mautGesamt_tollTypes_unnest.strecke as mautGesamt_tollTypes_strecke,
   mautGesamt_tollTypes_unnest.kosten as mautGesamt_tollTypes_kosten,
   anzahlGefundenerRouten
-FROM wgs-emission-data-dev.emissions_testing.base_coors_wr_kilometriert_current_view,
+FROM `{$project_id}.{$dataset_id}.base_coors_wr_kilometriert_current_view`,
   UNNEST(response) AS response_unnest,
   UNNEST(response_unnest.routenPunkte) AS routenPunkte_unnest,
   UNNEST(response_unnest.mautGesamt) AS mautGesamt_unnest,

@@ -1,6 +1,6 @@
 project: 
   project_id: wgs-emission-data-dev
-  dataset_id: emissions_testing
+  dataset_id: emissions_postleitzahlen
   table_base_coors: base_coors
   table_base_coors_wr_kilometriert: base_coors_wr_kilometriert
   table_routen_plz: routen_plz

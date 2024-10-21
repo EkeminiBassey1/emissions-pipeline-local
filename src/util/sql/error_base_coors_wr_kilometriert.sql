@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `wgs-emission-data-dev.emissions_testing.error_base_coors_wr_kilometriert` (
+CREATE TABLE IF NOT EXISTS `{$project_id}.{$dataset_id}.error_base_coors_wr_kilometriert` (
     ID STRING,
     Land_von STRING,
     PLZ_von STRING,

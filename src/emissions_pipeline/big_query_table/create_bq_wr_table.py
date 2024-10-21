@@ -2,21 +2,12 @@ from google.cloud import bigquery
 from google.oauth2 import service_account
 from loguru import logger
 import yaml
+from src.config.settings import PROJECT_ID, DATASET_ID, BASE_COORS, BASE_WR_KILOMETRIERT, ERROR, URL_WR, URL_DR, BATCH_SIZE, CREDENTIALS_PATH
 
 
 class BigQuery:
-    def __init__(self, key_file):
-        project_data = yaml.safe_load(open('config.yaml'))
-        self.project_id = project_data['project']['project_id']
-        self.dataset_id = project_data['project']['dataset_id']    
-        self.base_coors_wr_k = project_data['project']['table_base_coors_wr_kilometriert']
-        credentials = service_account.Credentials.from_service_account_file(
-            key_file, 
-            scopes=["https://www.googleapis.com/auth/bigquery",
-                    "https://www.googleapis.com/auth/pubsub", 
-                    "https://www.googleapis.com/auth/cloud-platform"]
-        )
-        self.client = bigquery.Client(credentials=credentials, project=project_data['project']['project_id'])
+    def __init__(self):
+        self.client = bigquery.Client(credentials=CREDENTIALS_PATH, project=PROJECT_ID)
 
     def create_bigquery_table(self):
 
@@ -26,7 +17,7 @@ class BigQuery:
             bigquery.SchemaField("Plz_von", "STRING", mode="NULLABLE"),
             bigquery.SchemaField("Land_nach", "STRING", mode="NULLABLE"),
             bigquery.SchemaField("Plz_nach", "STRING", mode="NULLABLE"),
-            bigquery.SchemaField("eventTimestamp", "TIMESTAMP", mode="NULLABLE"),
+            bigquery.SchemaField("eventTimestamp", "DATETIME", mode="NULLABLE"),
             bigquery.SchemaField("response", "RECORD", mode="REPEATED", fields=[
                 bigquery.SchemaField("rank", "INTEGER", mode="NULLABLE"),
                 bigquery.SchemaField("walterRoutenInfos", "RECORD", mode="NULLABLE", fields=[
@@ -96,11 +87,11 @@ class BigQuery:
             bigquery.SchemaField("anzahlGefundenerRouten", "INTEGER", mode="NULLABLE")
         ]
 
-        dataset_ref = self.client.dataset(self.dataset_id)
-        table_ref = dataset_ref.table(self.base_coors_wr_k)
+        dataset_ref = self.client.dataset(DATASET_ID)
+        table_ref = dataset_ref.table(BASE_WR_KILOMETRIERT)
         try: 
             table = bigquery.Table(table_ref, schema=schema)
             table = self.client.create_table(table)
-            logger.success(f"Table {self.project_id}.{self.dataset_id}.{self.base_coors_wr_k} created!")
+            logger.success(f"Table {PROJECT_ID}.{DATASET_ID}.{BASE_WR_KILOMETRIERT} created!")
         except: 
-            logger.error(f"Table {self.project_id}.{self.dataset_id}.{self.base_coors_wr_k} could not be created!")
+            logger.error(f"Table {PROJECT_ID}.{DATASET_ID}.{BASE_WR_KILOMETRIERT} could not be created!")

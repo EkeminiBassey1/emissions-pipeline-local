@@ -7,17 +7,12 @@ from pandas_gbq import read_gbq
 import pandas_gbq
 import pandas as pd
 from datetime import datetime
+from src.config.settings import PROJECT_ID, DATASET_ID, BASE_COORS, ROUTEN_PLZ,TABLE_VIEW
 import logging
 
 
 class BaseCoors:
     def __init__(self, name, output_path):
-        project_data = yaml.safe_load(open('config.yaml'))
-        self.project_id = project_data['project']['project_id']
-        self.dataset_id = project_data['project']['dataset_id']    
-        self.base_coors = project_data['project']['table_base_coors']
-        self.routen_plz = project_data['project']['table_routen_plz']
-        self.table_view_xlsx = project_data['project']['table_view']
         self.file_path_output = output_path
         self.file_name = name
 
@@ -32,21 +27,21 @@ class BaseCoors:
         base_coors table and give the input table an ID
         """
 
-        client = bigquery.Client(project=self.project_id)
+        client = bigquery.Client(project=PROJECT_ID)
 
-        query = f"SELECT * FROM `{self.project_id}.{self.dataset_id}.{self.routen_plz}`"
-        df_base_coors = read_gbq(query, project_id=self.project_id, dialect="standard")
+        query = f"SELECT * FROM `{PROJECT_ID}.{DATASET_ID}.{ROUTEN_PLZ}`"
+        df_base_coors = read_gbq(query, project_id=PROJECT_ID, dialect="standard")
 
         df_base_coors['ID'] = df_base_coors.apply(lambda row: hashlib.md5(''.join(map(str, row)).encode()).hexdigest(),
                                                 axis=1)
-        destination_table_base_coors = f'{self.project_id}.{self.dataset_id}.{self.base_coors}'
+        destination_table_base_coors = f'{PROJECT_ID}.{DATASET_ID}.{BASE_COORS}'
 
         job_config = bigquery.LoadJobConfig(create_disposition="CREATE_NEVER", write_disposition="WRITE_APPEND")
         job = client.load_table_from_dataframe(df_base_coors, destination_table_base_coors,
                                             job_config=job_config)
         job.result()
 
-        logger.success(f'Data loaded into {self.base_coors}')
+        logger.success(f'Data loaded into {BASE_COORS}')
         
     def transform_bq_table_to_xlsx(self):
         """
@@ -60,7 +55,7 @@ class BaseCoors:
             local_directory (str): The directory where the file will be saved (default is current directory).
         """
 
-        destination_table = f"{self.project_id}.{self.dataset_id}.{self.table_view_xlsx}"
+        destination_table = f"{PROJECT_ID}.{DATASET_ID}.{TABLE_VIEW}"
 
         dt = datetime.now()
         dt_string = dt.strftime("%Y_%m_%d_%H_%M_%S")
@@ -69,11 +64,10 @@ class BaseCoors:
         local_file_path = f"{self.file_path_output}/{file_name}"
 
         query = f"SELECT * FROM `{destination_table}`"
-
         logger.info("Starting to process BQ table to xlsx...")
 
         try:
-            df = pandas_gbq.read_gbq(query, project_id=self.project_id, dialect='standard')
+            df = pandas_gbq.read_gbq(query, project_id=PROJECT_ID, dialect='standard')
             logger.info(f"Fetched {len(df)} rows from BigQuery table: {destination_table}")
             df = df.astype(str)
             df.to_excel(local_file_path, index=False)
