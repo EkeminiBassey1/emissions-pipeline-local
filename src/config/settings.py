@@ -2,6 +2,8 @@ import os
 import yaml
 import json
 from google.oauth2 import service_account
+import os
+import glob
 
 def load_yaml_config(yaml_file):
     with open(yaml_file, 'r') as file:
@@ -30,7 +32,18 @@ def load_env_variables(key_file, project_id, dataset_id, base_coors, table_base_
         "CREDENTIALS": credentials
     }
 
-key_file = "wgs-emission-data-dev.json"
+def get_single_json_filename(folder_path):
+    json_files = glob.glob(os.path.join(folder_path, "*.json"))
+    
+    if len(json_files) == 0:
+        raise FileNotFoundError("No JSON file found in the folder.")
+    elif len(json_files) > 1:
+        raise ValueError("More than one JSON file found in the folder.")
+    
+    json_file = json_files[0]    
+    return json_file
+
+key_file = get_single_json_filename('key_file')
 yaml_config = load_yaml_config(os.path.join(os.path.dirname(__file__), 'config.yaml'))
 env_config = load_env_variables(
     key_file=key_file, 
