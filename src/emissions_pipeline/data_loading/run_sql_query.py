@@ -31,7 +31,6 @@ class RunQueries:
             if use_replacements:
                 query = query.replace("{$project_id}",PROJECT_ID).replace("{$dataset_id}", DATASET_ID)
 
-            logger.info(query)
             query_job = self.client.query(query)
             results = query_job.result()
             logger.info(f"{name} has been created.")

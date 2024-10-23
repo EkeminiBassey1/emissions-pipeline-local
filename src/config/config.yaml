@@ -1,12 +1,16 @@
 project: 
   project_id: wgs-emission-data-dev
-  dataset_id: emissions
+  dataset_id: emissions_testing
   table_base_coors: base_coors
   table_base_coors_wr_kilometriert: base_coors_wr_kilometriert
   table_routen_plz: routen_plz
   table_error: error_base_coors_wr_kilometriert
   table_view: base_coors_wr_kilometriert_excel_file
   batch_size: 50
+  error_rate_toleration: 25
 url: 
   wr_url_direct_route: http://rout-routes-cmp.prod.lkw-walter.com/gisl-routes-cmp/api/calculateDirectRoute
   wr_url_walter_route: http://rout-routes-cmp.prod.lkw-walter.com/gisl-routes-cmp/api/calculateWalterRoute
+
+
+#'https://rout-routes2-cmp.prod.lkw-walter.com/rout-routes2-cmp/api/calculateDirectRoute'

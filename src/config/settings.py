@@ -1,6 +1,5 @@
 import os
 import yaml
-import json
 from google.oauth2 import service_account
 import os
 import glob
@@ -9,7 +8,7 @@ def load_yaml_config(yaml_file):
     with open(yaml_file, 'r') as file:
         return yaml.safe_load(file)
 
-def load_env_variables(key_file, project_id, dataset_id, base_coors, table_base_coors_wr_kilometriert, table_error, routen_plz, table_view, url_wr, url_dr, batch_size):
+def load_env_variables(key_file, project_id, dataset_id, base_coors, table_base_coors_wr_kilometriert, table_error, routen_plz, table_view, url_wr, url_dr, error_rate_toleration, batch_size):
     credentials = service_account.Credentials.from_service_account_file(
             key_file,
             scopes=[
@@ -27,8 +26,9 @@ def load_env_variables(key_file, project_id, dataset_id, base_coors, table_base_
         "ROUTEN_PLZ":routen_plz,
         "TABLE_VIEW": table_view,
         "URL_WR": url_wr,
-        "URL_DR": url_dr, 
-        "BATCH_SIZE": batch_size,
+        "URL_DR": url_dr,
+        "BATCH_SIZE":batch_size, 
+        "ERROR_RATE_TOL": error_rate_toleration,
         "CREDENTIALS": credentials
     }
 
@@ -55,7 +55,8 @@ env_config = load_env_variables(
     routen_plz=yaml_config["project"]["table_routen_plz"],  
     table_view=yaml_config["project"]["table_view"], 
     url_wr=yaml_config["url"]["wr_url_walter_route"],
-    url_dr=yaml_config["url"]["wr_url_direct_route"],  
+    url_dr=yaml_config["url"]["wr_url_direct_route"],
+    error_rate_toleration = yaml_config["project"]["error_rate_toleration"],  
     batch_size=yaml_config["project"]["batch_size"]
     )
 CONFIG = {**yaml_config, **env_config}
@@ -69,5 +70,6 @@ ROUTEN_PLZ=CONFIG.get("ROUTEN_PLZ")
 TABLE_VIEW = CONFIG.get("TABLE_VIEW")
 URL_WR = CONFIG.get("URL_WR")
 URL_DR = CONFIG.get("URL_DR")
+ERROR_RATE_TOL = CONFIG.get("ERROR_RATE_TOL")
 BATCH_SIZE = CONFIG.get("BATCH_SIZE")
 CREDENTIALS_PATH = CONFIG.get("CREDENTIALS_PATH")

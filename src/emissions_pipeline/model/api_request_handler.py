@@ -13,7 +13,7 @@ featureparameter = api_manager.set_featureParameter(maut=True)
 async def send_request_async(session, url, headers, row, max_retries=3, timeout=10):
     for attempt in range(max_retries):
         try:
-            routenpunkte = api_manager.set_routenpunkte_zonenpunkt(row, 'Land_von', 'Plz_von', 'Land_nach', 'Plz_nach')
+            routenpunkte = api_manager.set_routenpunkte_zonenpunkt(row, 'Land_von', 'PLZ_von', 'Land_nach', 'PLZ_nach')
             request_data = api_manager.create_request_body(routenpunkte, featureparameter, maxResults=50)
             json_payload = json.loads(api_manager.convert_request(request_data))
 
@@ -33,9 +33,9 @@ async def send_request_async(session, url, headers, row, max_retries=3, timeout=
     return {
         "ID": row['ID'],
         "Land_von": row['Land_von'],
-        "Plz_von": row["Plz_von"],
+        "PLZ_von": row["PLZ_von"],
         "Land_nach": row["Land_nach"],
-        "Plz_nach": row["Plz_nach"]
+        "PLZ_nach": row["PLZ_nach"]
     }
 
 async def send_requests_async(df, url, headers):

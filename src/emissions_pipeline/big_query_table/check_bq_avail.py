@@ -30,10 +30,10 @@ class BQOperations:
         table_ref = f"{DATASET_ID}.{BASE_WR_KILOMETRIERT}"        
         try:
             self.client.get_table(table_ref)
-            logger.info(f"Table {table_ref} already exists.")
+            logger.info(f"Table {table_ref} already exists!")
         except NotFound:
-            logger.info(f"Table {table_ref} not found. Creating table.")
-            self.bq_creator.create_bigquery_table()
+            logger.info(f"Table {table_ref} not found. Creating table...")
+            self.bq_creator.create_bigquery_table() 
             
     def check_dataset_table(self):
         self.check_or_create_dataset()
