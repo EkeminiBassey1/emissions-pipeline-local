@@ -11,6 +11,3 @@ project:
 url: 
   wr_url_direct_route: http://rout-routes-cmp.prod.lkw-walter.com/gisl-routes-cmp/api/calculateDirectRoute
   wr_url_walter_route: http://rout-routes-cmp.prod.lkw-walter.com/gisl-routes-cmp/api/calculateWalterRoute
-
-
-#'https://rout-routes2-cmp.prod.lkw-walter.com/rout-routes2-cmp/api/calculateDirectRoute'
