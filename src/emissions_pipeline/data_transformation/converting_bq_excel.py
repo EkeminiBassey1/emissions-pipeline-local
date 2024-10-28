@@ -3,21 +3,24 @@ import os
 
 import pandas as pd
 import pandas_gbq
+import inflect
 from google.cloud import bigquery
+from src.emissions_pipeline.data_loading.run_sql_query import RunQueries
 from loguru import logger
 from pandas_gbq import read_gbq
 
 import src.util.multiple_excel_files as multiple_excel_files
 from settings import (CREDENTIALS_PATH, DATASET_ID, ERROR, FOLDER_NAME, PROJECT_ID, TABLE_VIEW, EXCEL_FILE_NAME)
 
-class BQLoading:
+class BQTransformation:
     def __init__(self, output_path):
+        self.run_queries = RunQueries()
         self.file_path_output = output_path
         self.client = bigquery.Client(credentials=CREDENTIALS_PATH, project=PROJECT_ID)
         self.destination_table = f"{PROJECT_ID}.{DATASET_ID}.{TABLE_VIEW}"
         self.local_file_path = f"{self.file_path_output}/{EXCEL_FILE_NAME}"
         self.query = f"SELECT * FROM `{self.destination_table}`"
-
+        self.p = inflect.engine()
 
     def transform_bq_table_to_xlsx(self):
         df = pandas_gbq.read_gbq(self.query, project_id=PROJECT_ID, dialect='standard')
@@ -48,43 +51,39 @@ class BQLoading:
             logger.error(
                 f"Second sheet could not be created and appended! Error: {e}")
 
-    def _create_multiple_excel_files(self, parts_length: int, dataframe_length:int):
+    def _create_multiple_queries_excel_files(self, parts_length: int, dataframe_length:int):
         list_parts_query = []
         offset = 0
         query = importlib.resources.read_text(multiple_excel_files, "create_excel_output_view.sql")
         logger.info("Creating the view for the excel files...")
-
+        
         part_size = self._calculating_number_of_excel_files_excel_size(dataframe_length=dataframe_length, return_value="parts")
 
         for i in range(1, parts_length+1):
-            query_template = importlib.resources.read_text(
-                multiple_excel_files, "create_excel_output_view.sql")
+            file_name = f"{EXCEL_FILE_NAME}_{self._number_to_words_with_underscores(i)}"
+            query_template = importlib.resources.read_text(multiple_excel_files, "create_excel_output_view.sql")
             query = query_template.replace("{$project_id}", PROJECT_ID) \
                 .replace("{$dataset_id}", DATASET_ID) \
-                .replace("{$excel_file_view_part}", f"{EXCEL_FILE_NAME}_{i}") \
+                .replace("{$excel_file_view_part}", file_name) \
                 .replace("{$table_view}", TABLE_VIEW) \
                 .replace("{$parts}", str(part_size)) \
-                .replace("{$offset}", str(part_size))
+                .replace("{$offset}", str(offset))
             offset = offset + part_size
-            query_job = self.client.query(query)
-            logger.info(f"{query} has been created...")
-            results = query_job.result()
             list_parts_query.append(query)
-            return list_parts_query
         else:
-            logger.info(
-                "The table has less than 1 Million rows and can be stored in one file!")
+            logger.info("The table has less than 1 Million rows and can be stored in one file!")
+        return list_parts_query
 
     def _temp_table_to_excel(self, parts_length: int):
-        query_template = importlib.resources.read_text(
-            multiple_excel_files, "excel_file_view_parts.sql")
-        self._create_new_folder_for_multiple_excel_files(
-            file_path=self.file_path_output, name=FOLDER_NAME)
+        query_template = importlib.resources.read_text(multiple_excel_files, "excel_file_view_parts.sql")
+        self._create_new_folder_for_multiple_excel_files(file_path=self.file_path_output, name=FOLDER_NAME)
 
         logger.info("Exporting the excel views to excel file on-prem...")
         for i in range(1, parts_length + 1):
+            file_name = f"{EXCEL_FILE_NAME}_{self._number_to_words_with_underscores(i)}"            
             query = query_template.replace("{$project_id}", PROJECT_ID).replace(
-                "{$dataset_id}", DATASET_ID).replace("{$i}", f"{i}")
+                "{$dataset_id}", DATASET_ID).replace("{$excel_file_view_part}", file_name)
+            
             df = pandas_gbq.read_gbq(
                 query, project_id=PROJECT_ID, dialect='standard')
             local_file_path = f"{self.file_path_output}/{FOLDER_NAME}/{EXCEL_FILE_NAME}_{i}.xlsx"
@@ -120,12 +119,16 @@ class BQLoading:
                     "Therefore it will be splitted to multiple files.\n" +
                     "The process begins now...")
         excel_file_parts = self._calculating_number_of_excel_files_excel_size(length)
-        self._create_multiple_excel_files(excel_file_parts, dataframe_length=length)
+        list_queries = self._create_multiple_queries_excel_files(excel_file_parts, dataframe_length=length)
+        self.run_queries.run_list_queries(queries=list_queries)
         self._temp_table_to_excel(excel_file_parts)
         logger.info(f"XLSX file saved locally at: {path}")
 
     def _less_than_million_rows(self, dataframe, path: str):
-        logger.info(
-            "The table has less than 1 Million rows and can be stored in one file!")
+        logger.info("The table has less than 1 Million rows and can be stored in one file!")
         dataframe.to_excel(path, index=False)
         self._create_sheet2_for_errors(path)
+    
+    def _number_to_words_with_underscores(self, number):
+        words = self.p.number_to_words(number)
+        return words.replace(" ", "_")

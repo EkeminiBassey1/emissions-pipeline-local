@@ -42,5 +42,5 @@ file should be a .json file
 
 # Run the project
 
-with the following command: python main.py --input_file_path in_put_path/folder/name_of_file.xlsx  --output_file_path out_put_path/folder/. a name for the output folder is determined 
+with the following command: python main.py --input_file_path in_put_path/folder/name_of_file.xlsx  --output_file_path out_put_path/folder/. A name for the output folder is determined 
 in the config.yaml file. 

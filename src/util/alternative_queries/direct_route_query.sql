@@ -3,7 +3,7 @@ WITH RankedRows AS (
     *,
     COUNT(1) OVER (PARTITION BY response_unnest.rank) AS rank_count
   FROM
-    `{$project_id}.{$dataset_id}.base_coors_wr_kilometriert`,
+    `{$project_id}.{$dataset_id}.{$base_coors_wr_kilometriert}`,
     UNNEST(response) AS response_unnest
   WHERE
     response_unnest.rank IN (1, 2)

@@ -1,4 +1,4 @@
-from src.emissions_pipeline.data_transformation.converting_bq_excel import BQLoading
+from src.emissions_pipeline.data_transformation.converting_bq_excel import BQTransformation
 from src.emissions_pipeline.data_loading.data_bigquery_upload import BigQUpload
 from src.emissions_pipeline.data_transformation.routen_plz_upload import RoutenPLZ
 from src.emissions_pipeline.data_loading.run_sql_query import RunQueries
@@ -10,7 +10,7 @@ from loguru import logger
 
 class DataPrep: 
     def __init__(self, input_file_path, output_file_path):
-        self.data_transformation = BQLoading(output_path=output_file_path)
+        self.data_transformation = BQTransformation(output_path=output_file_path)
         self.run_queries = RunQueries()
         self.bq_check = BQOperations()
         self.uploading_to_bq = BigQUpload()
@@ -55,8 +55,10 @@ class DataPrep:
     def _step_creating_excel_files(self):
         logger.info("Step creating view and excel file...")
         if self.url_wr_dr_choice == URL_WR: 
+            logger.info("Creating view for WalterRoute...")
             self.run_queries.run_queries(use_replacements=True, query_type="view")
             self.data_transformation.transform_bq_table_to_xlsx()
         elif self.url_wr_dr_choice == URL_DR:
+            logger.info("Creating view for DirectRoute...")
             self.run_queries.create_directRoute_view()
         logger.success("View and excel files haven been created!")

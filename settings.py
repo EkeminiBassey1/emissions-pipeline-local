@@ -42,7 +42,7 @@ def _get_single_json_filename(folder_path):
     return json_file
 
 def _load_yaml_config(yaml_file):
-    with open(yaml_file, 'r') as file:
+    with open(yaml_file, 'r', encoding="utf-8") as file:
         return yaml.safe_load(file)
 
 key_file = _get_single_json_filename('key_file')
@@ -79,4 +79,3 @@ BATCH_SIZE = CONFIG.get("BATCH_SIZE")
 FOLDER_NAME = CONFIG.get("FOLDER_NAME")
 EXCEL_FILE_NAME = CONFIG.get("EXCEL_FILE_NAME")
 CREDENTIALS_PATH = CONFIG.get("CREDENTIALS_PATH")
-
