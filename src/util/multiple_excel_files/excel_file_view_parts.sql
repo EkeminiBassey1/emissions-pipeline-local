@@ -1,1 +1,1 @@
-SELECT * FROM `{$project_id}.{$dataset_id}.excel_file_view_part{$i}`
+SELECT * FROM `{$project_id}.{$dataset_id}.{$excel_file_view_part}`

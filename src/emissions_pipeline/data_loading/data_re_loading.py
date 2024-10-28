@@ -17,8 +17,7 @@ class ReRun:
         perccentage_error = self._check_length_error_table()
         new_batch_size = BATCH_SIZE
         if perccentage_error <= ERROR_RATE_TOL:
-            logger.info(
-                f"The current error rate is {perccentage_error}% for the {ERROR} table. A re-run will not be continued. Calculation has been concluded.")
+            logger.info(f"The current error rate is {perccentage_error}% for the {ERROR} table. A re-run will not be continued. Calculation has been concluded.")
         elif perccentage_error >= ERROR_RATE_TOL:
             logger.info(
                 f"The current error rate  is at {perccentage_error}% for the {ERROR} table. A re-run of the calculation will be initiated now...")
@@ -29,26 +28,22 @@ class ReRun:
                 uploading_to_bq.update_base_area_code_kilometrierung_table(
                     base_coors_wr_kilometriert=BASE_WR_KILOMETRIERT, batch_size=new_batch_size, url=url)
                 perccentage_error = self._check_length_error_table()
-                logger.info(f"The error rate is now: {perccentage_error}!")
+                logger.info(f"The error rate is now: {perccentage_error}%!")
                 if perccentage_error <= ERROR_RATE_TOL:
-                    logger.info(
-                        f"The error rate for the {ERROR} table is currently {perccentage_error}%. A re-run will not proceed, as calculations have been finalized.")
+                    logger.info(f"The error rate for the {ERROR} table is currently {perccentage_error}%. A re-run will not proceed, as calculations have been finalized.")
                     break
 
     def _check_length_error_table(self):
         query_base_wr = f"SELECT count(ID) FROM {PROJECT_ID}.{DATASET_ID}.{BASE_WR_KILOMETRIERT}"
         query_error = f"SELECT count(ID) FROM {PROJECT_ID}.{DATASET_ID}.{ERROR}"
 
-        df_result = read_gbq(
-            query_base_wr, project_id=PROJECT_ID, dialect="standard")
-        df_error = read_gbq(
-            query_error, project_id=PROJECT_ID, dialect="standard")
+        df_result = read_gbq(query_base_wr, project_id=PROJECT_ID, dialect="standard")
+        df_error = read_gbq(query_error, project_id=PROJECT_ID, dialect="standard")
 
-        result_variable = df_result['f0_'].iloc[0]
-        result_variable_error = df_error['f0_'].iloc[0]
+        result_variable = df_result.values.squeeze()
+        result_variable_error = df_error.values.squeeze()
 
-        percentage = round(
-            (result_variable_error / (result_variable + result_variable_error))*100, 2)
+        percentage = round((result_variable_error / (result_variable + result_variable_error))*100, 2)
         return percentage
 
     def _truncate_error_table(self):

@@ -2,6 +2,7 @@ import os
 import importlib.resources
 import src.util.sql as queries_dh
 import src.util.view as queries_view
+import src.util.alternative_queries as queries_alternative_queries
 from google.cloud import bigquery
 from loguru import logger
 from settings import PROJECT_ID, DATASET_ID, CREDENTIALS_PATH
@@ -39,3 +40,10 @@ class RunQueries:
             results = query_job.result()
             logger.success(
                 f"Table {PROJECT_ID}.{DATASET_ID}.{name} has been created!")
+
+    def create_directRoute_view(self):
+        logger.info("Creating view for Direct Route...")
+        query = importlib.resources.read_text(queries_alternative_queries, "direct_route_query.sql")
+        query_job = self.client.query(query)
+        results = query_job.result()
+        logger.success("The view has been created!")

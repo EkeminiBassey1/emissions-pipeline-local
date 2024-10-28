@@ -9,6 +9,7 @@ project:
   batch_size: 1000
   error_rate_toleration: 10
   folder_name: multiple_excel_file_output
+  excel_file_name: output_file
 url: 
   wr_url_direct_route: http://rout-routes-cmp.prod.lkw-walter.com/gisl-routes-cmp/api/calculateWalterRoute
   wr_url_walter_route: http://rout-routes-cmp.prod.lkw-walter.com/gisl-routes-cmp/api/calculateWalterRoute
