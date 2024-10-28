@@ -3,10 +3,12 @@ import os
 from datetime import datetime
 
 import requests
+from loguru import logger
 
 from src.emissions_pipeline.model.request_body import RequestBody, FeatureParameter
 from src.emissions_pipeline.model.request_body import Routenpunkte_zonenpunkt, Routenpunkte_koordinaten
 from src.emissions_pipeline.model.request_body import Koordinaten, Zonenpunkte
+from settings import URL_WR, URL_DR
 
 
 class ApiRequestManager:
@@ -54,7 +56,8 @@ class ApiRequestManager:
                             org_einheit: int = None, maxResults: int = 1, laendersperren: bool = None,
                             manoeuvres: bool = None, routensegmente: bool = None):
 
-        feature_parameter_instance = FeatureParameter(**featureparameter['featureParameter'])
+        feature_parameter_instance = FeatureParameter(
+            **featureparameter['featureParameter'])
 
         request_body = RequestBody(
             archive=archive,
@@ -78,7 +81,8 @@ class ApiRequestManager:
 
     def get_response(self, ct_url, headers, request_data):
         request_data_json = json.dumps(request_data.dict())
-        response = requests.post(ct_url, json=request_data_json, headers=headers)
+        response = requests.post(
+            ct_url, json=request_data_json, headers=headers)
         return response
 
     def save_request_bucket(self, client_storage, bucket_name):
@@ -89,3 +93,11 @@ class ApiRequestManager:
     def convert_request(self, request_data):
         request_data_json = json.dumps(request_data.dict())
         return request_data_json
+
+    def set_MaxResults(self, url):
+        if url == URL_WR:
+            maxResults = 50
+            return maxResults
+        elif url == URL_DR:
+            maxResults = 2
+            return maxResults

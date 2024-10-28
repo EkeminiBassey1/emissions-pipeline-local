@@ -14,7 +14,9 @@ async def send_request_async(session, url, headers, row, max_retries=3, timeout=
     for attempt in range(max_retries):
         try:
             routenpunkte = api_manager.set_routenpunkte_zonenpunkt(row, 'Land_von', 'PLZ_von', 'Land_nach', 'PLZ_nach')
-            request_data = api_manager.create_request_body(routenpunkte, featureparameter, maxResults=50)
+            maxResults = api_manager.set_MaxResults(url=url)
+            request_data = api_manager.create_request_body(routenpunkte, featureparameter, maxResults=maxResults)
+            
             json_payload = json.loads(api_manager.convert_request(request_data))
 
             async with session.post(url, json=json_payload, headers=headers, timeout=timeout) as response:

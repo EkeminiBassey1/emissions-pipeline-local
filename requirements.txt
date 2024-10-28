@@ -4,9 +4,9 @@ google-cloud-error-reporting==1.11.0
 google-oauth2-tool==0.0.3
 loguru==0.7.2
 numpy==1.24.4
-pandas==2.0.3
+pandas>=1.4.0
 PyYAML==6.0.1
 pandas_gbq==0.24.0
 aiohttp==3.10.10
 pydantic==2.9.2
-openpyxl==3.1.5
+openpyxl>=3.0.9

@@ -6,8 +6,9 @@ project:
   table_routen_plz: routen_plz
   table_error: error_base_coors_wr_kilometriert
   table_view: base_coors_wr_kilometriert_excel_file
-  batch_size: 50
-  error_rate_toleration: 25
+  batch_size: 1000
+  error_rate_toleration: 10
+  folder_name: multiple_excel_file_output
 url: 
-  wr_url_direct_route: http://rout-routes-cmp.prod.lkw-walter.com/gisl-routes-cmp/api/calculateDirectRoute
+  wr_url_direct_route: http://rout-routes-cmp.prod.lkw-walter.com/gisl-routes-cmp/api/calculateWalterRoute
   wr_url_walter_route: http://rout-routes-cmp.prod.lkw-walter.com/gisl-routes-cmp/api/calculateWalterRoute
