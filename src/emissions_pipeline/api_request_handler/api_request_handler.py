@@ -4,19 +4,17 @@ import json
 import aiohttp
 from loguru import logger
 
-from src.emissions_pipeline.data_intergration.apiRequestManager import ApiRequestManager
-from src.emissions_pipeline.model.preparing_area_code_dataframe import uploading_area_code_dataframe 
+from src.emissions_pipeline.api_request_handler.apiRequestManager import ApiRequestManager
+from src.emissions_pipeline.api_request_handler.preparing_area_code_dataframe import uploading_area_code_dataframe 
 
 api_manager = ApiRequestManager()
 featureparameter = api_manager.set_featureParameter(maut=True)
 
-async def send_request_async(session, url, headers, row, max_retries=3, timeout=10):
+async def send_request_async(session, url, headers, row, max_retries=3, maxRes=50, timeout=10):
     for attempt in range(max_retries):
         try:
             routenpunkte = api_manager.set_routenpunkte_zonenpunkt(row, 'Land_von', 'PLZ_von', 'Land_nach', 'PLZ_nach')
-            maxResults = api_manager.set_MaxResults(url=url)
-            request_data = api_manager.create_request_body(routenpunkte, featureparameter, maxResults=maxResults)
-            
+            request_data = api_manager.create_request_body(routenpunkte, featureparameter, maxResults=maxRes)
             json_payload = json.loads(api_manager.convert_request(request_data))
 
             async with session.post(url, json=json_payload, headers=headers, timeout=timeout) as response:

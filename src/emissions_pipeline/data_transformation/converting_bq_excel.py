@@ -17,24 +17,29 @@ class BQTransformation:
         self.run_queries = RunQueries()
         self.file_path_output = output_path
         self.client = bigquery.Client(credentials=CREDENTIALS_PATH, project=PROJECT_ID)
-        self.destination_table = f"{PROJECT_ID}.{DATASET_ID}.{TABLE_VIEW}"
         self.local_file_path = f"{self.file_path_output}/{EXCEL_FILE_NAME}"
-        self.query = f"SELECT * FROM `{self.destination_table}`"
         self.p = inflect.engine()
+        self.excel_max_row = 999999
+        #ToDo. Fix the table name. So that views of DR and WR can be exported. 
+        
+    def transform_bq_table_to_xlsx(self, table:str):
+        destination_table = f"{PROJECT_ID}.{DATASET_ID}.{table}"
+        query = f"SELECT * FROM `{destination_table}`"
 
-    def transform_bq_table_to_xlsx(self):
-        df = pandas_gbq.read_gbq(self.query, project_id=PROJECT_ID, dialect='standard')
+        df = pandas_gbq.read_gbq(query, project_id=PROJECT_ID, dialect='standard')
         df = df.astype(str)
         df_length = len(df)
         
-        logger.info(f"Fetched {df_length} rows from BigQuery table: {self.destination_table}")
+        logger.info(f"Fetched {df_length} rows from BigQuery table: {destination_table}")
         logger.info("Starting to process BQ table to xlsx...")
 
         try:
-            if df_length <= 999999:
-                self._less_than_million_rows(dataframe=df, path=self.local_file_path)
-            elif df_length > 999999:
-                self._more_than_million_rows(length=df_length, path=self.local_file_path)
+            if df_length <= self.excel_max_row :
+                logger.info("The table has less than 1 Million rows and can be stored in one file!")
+                df.to_excel(self.local_file_path, engine='openpyxl', index=False)
+                self._create_sheet2_for_errors(self.local_file_path)
+            elif df_length > self.excel_max_row :
+                self._more_than_million_rows(length=df_length, path=self.local_file_path, table_view=table)
         except Exception as e:
             logger.error(f"Error while processing BQ table to XLSX: {e}")
             raise
@@ -51,7 +56,7 @@ class BQTransformation:
             logger.error(
                 f"Second sheet could not be created and appended! Error: {e}")
 
-    def _create_multiple_queries_excel_files(self, parts_length: int, dataframe_length:int):
+    def _create_multiple_queries_excel_files(self, parts_length: int, dataframe_length:int, table_view:str):
         list_parts_query = []
         offset = 0
         query = importlib.resources.read_text(multiple_excel_files, "create_excel_output_view.sql")
@@ -65,13 +70,13 @@ class BQTransformation:
             query = query_template.replace("{$project_id}", PROJECT_ID) \
                 .replace("{$dataset_id}", DATASET_ID) \
                 .replace("{$excel_file_view_part}", file_name) \
-                .replace("{$table_view}", TABLE_VIEW) \
+                .replace("{$table_view}", table_view) \
                 .replace("{$parts}", str(part_size)) \
                 .replace("{$offset}", str(offset))
             offset = offset + part_size
             list_parts_query.append(query)
         else:
-            logger.info("The table has less than 1 Million rows and can be stored in one file!")
+            logger.info("The table has less than 1 Million rows and can be stored in one file!") #ToDo
         return list_parts_query
 
     def _temp_table_to_excel(self, parts_length: int):
@@ -101,8 +106,8 @@ class BQTransformation:
     def _calculating_number_of_excel_files_excel_size(self, dataframe_length, return_value="counter"):
         counter = 1
         parts = dataframe_length
-        if dataframe_length >= 999999:
-            while parts > 999999:
+        if dataframe_length >= self.excel_max_row :
+            while parts > self.excel_max_row :
                 counter += 1
                 parts = int(dataframe_length / counter)
 
@@ -114,21 +119,16 @@ class BQTransformation:
             raise ValueError(
                 "Invalid return_value specified. Use 'counter' or 'parts'.")
 
-    def _more_than_million_rows(self, length: int, path: str):
+    def _more_than_million_rows(self, length: int, path: str, table_view:str):
         logger.info("The table has more than 1 Million rows and can't be stored in one file.\n" +
                     "Therefore it will be splitted to multiple files.\n" +
                     "The process begins now...")
         excel_file_parts = self._calculating_number_of_excel_files_excel_size(length)
-        list_queries = self._create_multiple_queries_excel_files(excel_file_parts, dataframe_length=length)
+        list_queries = self._create_multiple_queries_excel_files(excel_file_parts, dataframe_length=length, table_view=table_view)
         self.run_queries.run_list_queries(queries=list_queries)
         self._temp_table_to_excel(excel_file_parts)
         logger.info(f"XLSX file saved locally at: {path}")
 
-    def _less_than_million_rows(self, dataframe, path: str):
-        logger.info("The table has less than 1 Million rows and can be stored in one file!")
-        dataframe.to_excel(path, index=False)
-        self._create_sheet2_for_errors(path)
-    
     def _number_to_words_with_underscores(self, number):
         words = self.p.number_to_words(number)
         return words.replace(" ", "_")

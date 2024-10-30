@@ -38,8 +38,7 @@ class RunQueries:
 
             query_job = self.client.query(query)
             results = query_job.result()
-            logger.success(
-                f"Table {PROJECT_ID}.{DATASET_ID}.{name} has been created!")
+            logger.success(f"Table {PROJECT_ID}.{DATASET_ID}.{name} has been created!")
 
     def create_directRoute_view(self):
         logger.info("Creating view for Direct Route...")

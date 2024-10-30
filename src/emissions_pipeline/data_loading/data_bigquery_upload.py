@@ -5,7 +5,7 @@ from loguru import logger
 from pandas_gbq import read_gbq
 from google.cloud import bigquery
 from settings import PROJECT_ID, DATASET_ID, BASE_COORS, BASE_WR_KILOMETRIERT, ERROR, CREDENTIALS_PATH
-from src.emissions_pipeline.model.api_request_handler import send_requests_async
+from src.emissions_pipeline.api_request_handler.api_request_handler import send_requests_async
 
 
 class BigQUpload:

@@ -33,7 +33,7 @@ The config.yaml file specifies which projects will undergo calculation. Below ar
 - folder_name: Specifies the folder location for saving multiple Excel files when processing large volumes of area codes requiring conversion.
 - excel_file_name: Sets the name for the generated Excel file(s).
 
-This are the attributes in the file, you can change the attributes accroding to your wishes and run the project
+This are the attributes in the file, you can change the attributes according to your wishes and run the project
 
 # Importing Key file
 
@@ -44,3 +44,6 @@ file should be a .json file
 
 with the following command: python main.py --input_file_path in_put_path/folder/name_of_file.xlsx  --output_file_path out_put_path/folder/. A name for the output folder is determined 
 in the config.yaml file. 
+
+
+Add #.gitkeep

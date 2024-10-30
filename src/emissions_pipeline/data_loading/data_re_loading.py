@@ -21,6 +21,7 @@ class ReRun:
         elif perccentage_error >= ERROR_RATE_TOL:
             logger.info(
                 f"The current error rate  is at {perccentage_error}% for the {ERROR} table. A re-run of the calculation will be initiated now...")
+            logger.info(f"Batch size has been reduced to: {new_batch_size}...")
             while perccentage_error >= ERROR_RATE_TOL:
                 new_batch_size = int(new_batch_size / 2)
                 loading_bq_table_base_coors(TABLE=ERROR)

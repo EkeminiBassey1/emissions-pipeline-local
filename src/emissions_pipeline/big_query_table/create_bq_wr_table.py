@@ -1,8 +1,7 @@
 from google.cloud import bigquery
-from google.oauth2 import service_account
 from loguru import logger
 import yaml
-from settings import PROJECT_ID, DATASET_ID, BASE_COORS, BASE_WR_KILOMETRIERT, ERROR, URL_WR, URL_DR, BATCH_SIZE, CREDENTIALS_PATH
+from settings import PROJECT_ID, DATASET_ID, BASE_WR_KILOMETRIERT, CREDENTIALS_PATH
 
 
 class BigQuery:
