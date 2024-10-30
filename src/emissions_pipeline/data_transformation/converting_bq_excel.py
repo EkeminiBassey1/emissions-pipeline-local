@@ -9,8 +9,8 @@ from src.emissions_pipeline.data_loading.run_sql_query import RunQueries
 from loguru import logger
 from pandas_gbq import read_gbq
 
-import src.util.multiple_excel_files as multiple_excel_files
-from settings import (CREDENTIALS_PATH, DATASET_ID, ERROR, FOLDER_NAME, PROJECT_ID, TABLE_VIEW, EXCEL_FILE_NAME)
+import src.util.sql_queries.multiple_excel_files as multiple_excel_files
+from settings import (CREDENTIALS_PATH, DATASET_ID, ERROR, FOLDER_NAME, PROJECT_ID, EXCEL_FILE_NAME)
 
 class BQTransformation:
     def __init__(self, output_path):

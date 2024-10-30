@@ -1,8 +1,8 @@
 import os
 import importlib.resources
-import src.util.sql as queries_dh
-import src.util.view as queries_view
-import src.util.alternative_queries as queries_alternative_queries
+import src.util.sql_queries.main_queries as queries_dh
+import src.util.sql_queries.view as queries_view
+import src.util.sql_queries.alternative_queries as queries_alternative_queries
 from google.cloud import bigquery
 from loguru import logger
 from settings import PROJECT_ID, DATASET_ID, CREDENTIALS_PATH, BASE_WR_KILOMETRIERT
@@ -10,9 +10,9 @@ from settings import PROJECT_ID, DATASET_ID, CREDENTIALS_PATH, BASE_WR_KILOMETRI
 
 class RunQueries:
     def __init__(self):
-        folder_path_sql = 'src/util/sql'
-        folder_path_view = 'src/util/view'
-
+        folder_path_sql = 'src/util/sql_queries/main_queries'
+        folder_path_view = 'src/util/sql_queries/view'
+        
         self.file_names = [f for f in os.listdir(folder_path_sql) if f.endswith(
             '.sql') and os.path.isfile(os.path.join(folder_path_sql, f)) and f != '__init__.sql']
         self.file_names_view = [f for f in os.listdir(folder_path_view) if f.endswith(
