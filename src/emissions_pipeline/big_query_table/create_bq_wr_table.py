@@ -9,6 +9,9 @@ class BigQuery:
         self.client = bigquery.Client(credentials=CREDENTIALS_PATH, project=PROJECT_ID)
 
     def create_bigquery_table(self):
+        """
+        The `create_bigquery_table` function in Python creates a BigQuery table with a specified schema.
+        """
 
         schema = [
             bigquery.SchemaField("Client", "STRING", mode="NULLABLE"),

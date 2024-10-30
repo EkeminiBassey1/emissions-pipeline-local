@@ -10,7 +10,6 @@ from src.emissions_pipeline.model.request_body import Routenpunkte_zonenpunkt, R
 from src.emissions_pipeline.model.request_body import Koordinaten, Zonenpunkte
 from settings import URL_WR, URL_DR
 
-
 class ApiRequestManager:
     def __init__(self):
         pass

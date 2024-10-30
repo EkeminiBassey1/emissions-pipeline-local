@@ -2,17 +2,17 @@ from pandas_gbq import read_gbq
 from loguru import logger
 from google.cloud import bigquery
 
-from src.emissions_pipeline.data_transformation.base_coors_uploading import loading_bq_table_base_coors
+from src.emissions_pipeline.data_transformation.base_coors_uploading import BaseCoors
 from src.emissions_pipeline.data_loading.data_bigquery_upload import BigQUpload
 from settings import PROJECT_ID, DATASET_ID, BASE_WR_KILOMETRIERT, ERROR, ERROR_RATE_TOL, BATCH_SIZE, CREDENTIALS_PATH
 
 
 class ReRun:
     def __init__(self):
-        self.client = bigquery.Client(
-            credentials=CREDENTIALS_PATH, project=PROJECT_ID)
+        self.client = bigquery.Client(credentials=CREDENTIALS_PATH, project=PROJECT_ID)
+        self.upload_base_coors = BaseCoors()
 
-    def re_run_failed_requests(self, url: str):
+    def re_run_failed_requests(self, url: str, client:str):
         uploading_to_bq = BigQUpload()
         perccentage_error = self._check_length_error_table()
         new_batch_size = BATCH_SIZE
@@ -24,10 +24,9 @@ class ReRun:
             logger.info(f"Batch size has been reduced to: {new_batch_size}...")
             while perccentage_error >= ERROR_RATE_TOL:
                 new_batch_size = int(new_batch_size / 2)
-                loading_bq_table_base_coors(TABLE=ERROR)
+                self.upload_base_coors.loading_bq_table_base_coors(TABLE=ERROR)
                 self._truncate_error_table()
-                uploading_to_bq.update_base_area_code_kilometrierung_table(
-                    base_coors_wr_kilometriert=BASE_WR_KILOMETRIERT, batch_size=new_batch_size, url=url)
+                uploading_to_bq.update_base_area_code_kilometrierung_table(batch_size=new_batch_size, url=url, client_type=client)
                 perccentage_error = self._check_length_error_table()
                 logger.info(f"The error rate is now: {perccentage_error}%!")
                 if perccentage_error <= ERROR_RATE_TOL:

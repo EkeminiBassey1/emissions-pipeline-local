@@ -5,8 +5,8 @@ from src.emissions_pipeline.data_loading.run_sql_query import RunQueries
 from src.emissions_pipeline.data_loading.data_re_loading import ReRun
 from src.emissions_pipeline.big_query_table.check_bq_avail import BQOperations
 from src.emissions_pipeline.api_request_handler.url_set import UrlSelecting
-from src.emissions_pipeline.data_transformation.base_coors_uploading import loading_bq_table_base_coors
-from settings import TABLE_VIEW, DIRECT_ROUTE_VIEW, BASE_WR_KILOMETRIERT, ROUTEN_PLZ, BATCH_SIZE
+from src.emissions_pipeline.data_transformation.base_coors_uploading import BaseCoors
+from settings import TABLE_VIEW, DIRECT_ROUTE_VIEW, ROUTEN_PLZ, BATCH_SIZE
 from loguru import logger
 
 
@@ -19,6 +19,7 @@ class DataPrep:
         self.uploading_to_bq = BigQUpload()
         self.re_run_errors = ReRun()
         self.url_choosing = UrlSelecting()
+        self.upload_base_coors = BaseCoors()
         self.upload_routen_plz = RoutenPLZ(excel_file_path=input_file_path)
 
     def loading_into_tables(self):
@@ -31,14 +32,13 @@ class DataPrep:
         self.bq_check.check_dataset_table()
         self.run_queries.run_queries(use_replacements=True, query_type="main")
         self.upload_routen_plz.routen_plz_excle_file_upload()
-        loading_bq_table_base_coors(TABLE=ROUTEN_PLZ)
+        self.upload_base_coors.loading_bq_table_base_coors(TABLE=ROUTEN_PLZ)
         logger.success("Step data preparation has been completed!")
 
     def _step_data_kilometrierung(self):
         logger.info("Step Kilometrierung...")
-        self.uploading_to_bq.update_base_area_code_kilometrierung_table(
-            base_coors_wr_kilometriert=BASE_WR_KILOMETRIERT, url=self.url_choosing.get_url(), batch_size=BATCH_SIZE, client_type=self.url_choosing.get_client())
-        self.re_run_errors.re_run_failed_requests(url=self.url_choosing.get_url())
+        self.uploading_to_bq.update_base_area_code_kilometrierung_table(url=self.url_choosing.get_url(), batch_size=BATCH_SIZE, client_type=self.url_choosing.get_client())
+        self.re_run_errors.re_run_failed_requests(url=self.url_choosing.get_url(), client=self.url_choosing.get_client())
         logger.success("Kilometrierung has been completed!")
 
     def _step_creating_excel_files(self):

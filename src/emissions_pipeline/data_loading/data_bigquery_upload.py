@@ -10,11 +10,41 @@ from src.emissions_pipeline.api_request_handler.api_request_handler import send_
 
 class BigQUpload:
     def __init__(self):
-        pass
+        self.client = bigquery.Client(project=PROJECT_ID, credentials=CREDENTIALS_PATH)
+        self.query_test = f"SELECT * FROM {PROJECT_ID}.{DATASET_ID}.{BASE_COORS}"
+        self.destination_table_err = f"{PROJECT_ID}.{DATASET_ID}.{ERROR}"
+        self.destination_table = f"{PROJECT_ID}.{DATASET_ID}.{BASE_WR_KILOMETRIERT}"
 
-    def update_base_area_code_kilometrierung_table(self, base_coors_wr_kilometriert: str, url: str, batch_size: int, client_type:str, offset: int = 0):
-        destination_table = f"{PROJECT_ID}.{DATASET_ID}.{base_coors_wr_kilometriert}"
-        destination_table_err = f"{PROJECT_ID}.{DATASET_ID}.{ERROR}"
+    def update_base_area_code_kilometrierung_table(self, url: str, batch_size: int, client_type:str, offset: int = 0):
+        """
+        The function `update_base_area_code_kilometrierung_table` uploads data from a dataframe to BigQuery
+        in batches, handling successful and failed requests accordingly.
+        
+        :param base_coors_wr_kilometriert: The `base_coors_wr_kilometriert` parameter in the
+        `update_base_area_code_kilometrierung_table` function is a string representing the name of a table
+        in BigQuery where the base coordinates with kilometers are stored. This table will be used as the
+        destination table for loading
+        :type base_coors_wr_kilometriert: str
+        :param url: The `url` parameter in the `update_base_area_code_kilometrierung_table` function is a
+        string that represents the URL used for making requests in the code. It is passed to the function to
+        specify the endpoint where the requests will be sent
+        :type url: str
+        :param batch_size: The `batch_size` parameter in the `update_base_area_code_kilometrierung_table`
+        function determines the number of rows from the dataframe that will be processed and uploaded to
+        BigQuery in each iteration of the loop. It helps in managing the amount of data being processed at a
+        time to prevent
+        :type batch_size: int
+        :param client_type: The `client_type` parameter in the `update_base_area_code_kilometrierung_table`
+        function is used to specify the type of client for which the data is being updated in the BigQuery
+        table. It is a string parameter that helps identify or categorize the client associated with the
+        data being
+        :type client_type: str
+        :param offset: The `offset` parameter in the `update_base_area_code_kilometrierung_table` function
+        is used to specify the starting index from where the data should be processed in batches. It helps
+        in iterating over the dataframe in chunks of `batch_size` starting from the specified offset,
+        defaults to 0
+        :type offset: int (optional)
+        """
         headers = {
             "X-FWD": url,
             "X-AUTH": "wT6vNTkzKXH8E7jOfA5ay4cHGwoJPhOc2XS7UyhVWnQ",
@@ -23,16 +53,10 @@ class BigQUpload:
             "Connection": "close",
         }
 
-        client = bigquery.Client(
-            project=PROJECT_ID, credentials=CREDENTIALS_PATH)
-
-        query_test = f"SELECT * FROM {PROJECT_ID}.{DATASET_ID}.{BASE_COORS}"
-
-        df = read_gbq(query_test, project_id=PROJECT_ID, dialect="standard")
+        df = read_gbq(self.query_test, project_id=PROJECT_ID, dialect="standard")
 
         loop = asyncio.get_event_loop()
-        job_config = bigquery.LoadJobConfig(
-            create_disposition="CREATE_IF_NEEDED", write_disposition="WRITE_APPEND")
+        job_config = bigquery.LoadJobConfig(create_disposition="CREATE_IF_NEEDED", write_disposition="WRITE_APPEND")
 
         logger.info("Start uploading dataframe to Bigquery...")
         while True:
@@ -45,8 +69,7 @@ class BigQUpload:
             df_json_responses["Client"] = client_type
 
             try:
-                job = client.load_table_from_dataframe(
-                    df_json_responses, destination_table, job_config=job_config)
+                job = self.client.load_table_from_dataframe(df_json_responses, self.destination_table, job_config=job_config)
                 job.result()
                 logger.success(
                     f"Data has been loaded successfully into {BASE_WR_KILOMETRIERT}")
@@ -54,8 +77,8 @@ class BigQUpload:
                 logger.error(f"Error writing to BigQuery table: {e}")
 
             try:
-                job = client.load_table_from_dataframe(
-                    failed_df, destination_table_err, job_config=job_config)
+                job = self.client.load_table_from_dataframe(
+                    failed_df, self.destination_table_err, job_config=job_config)
                 job.result()
                 logger.success(
                     f"Data has been loaded successfully into {ERROR}")

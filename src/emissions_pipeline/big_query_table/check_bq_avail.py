@@ -5,6 +5,8 @@ from src.emissions_pipeline.big_query_table.create_bq_wr_table import BigQuery
 from settings import PROJECT_ID, DATASET_ID, BASE_WR_KILOMETRIERT, CREDENTIALS_PATH
 
 
+# The `BQOperations` class initializes BigQuery operations with specified project and dataset
+# references.
 class BQOperations:
     def __init__(self):
         self.bq_creator = BigQuery()
@@ -12,7 +14,9 @@ class BQOperations:
         self.client = bigquery.Client(credentials=CREDENTIALS_PATH, project=PROJECT_ID)
 
     def check_or_create_dataset(self):
-        """Check if a dataset exists, and create it if it does not."""
+        """
+        The function `check_or_create_dataset` checks if a dataset exists and creates it if it does not.
+        """
         try:
             self.client.get_dataset(DATASET_ID)
             logger.info(f"Dataset {DATASET_ID} already exists.")
@@ -26,7 +30,9 @@ class BQOperations:
             logger.info(f"Dataset {DATASET_ID} created.")
 
     def check_or_create_table(self):
-        """Check if a table exists, and create it if it does not."""
+        """
+        The function checks if a table exists in BigQuery and creates it if it does not.
+        """
         table_ref = f"{DATASET_ID}.{BASE_WR_KILOMETRIERT}"
         try:
             self.client.get_table(table_ref)
@@ -36,5 +42,9 @@ class BQOperations:
             self.bq_creator.create_bigquery_table()
 
     def check_dataset_table(self):
+        """
+        The function `check_dataset_table` checks if a dataset exists and creates it if not, then checks if
+        a table exists and creates it if not.
+        """
         self.check_or_create_dataset()
         self.check_or_create_table()

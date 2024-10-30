@@ -11,6 +11,38 @@ api_manager = ApiRequestManager()
 featureparameter = api_manager.set_featureParameter(maut=True)
 
 async def send_request_async(session, url, headers, row, max_retries=3, maxRes=50, timeout=10):
+    """
+    This Python async function sends a POST request with retries and timeouts, handling different
+    response statuses.
+    
+    :param session: The `session` parameter in the `send_request_async` function is an aiohttp
+    ClientSession object that represents a connection pool for making HTTP requests asynchronously. It
+    allows you to make HTTP requests using async/await syntax in Python
+    :param url: The `url` parameter in the `send_request_async` function is the URL to which the
+    asynchronous POST request will be sent. This URL should be the endpoint of the API you are trying to
+    communicate with
+    :param headers: Headers are typically used to provide additional information to the server when
+    making an HTTP request. They can include things like authentication tokens, content type, user-agent
+    information, and more. In the context of the `send_request_async` function, headers are passed along
+    with the request to provide necessary details to the
+    :param row: The `row` parameter in the `send_request_async` function seems to represent a data row
+    or object containing information such as 'ID', 'Land_von', 'PLZ_von', 'Land_nach', and 'PLZ_nach'.
+    This data is used to set route points and
+    :param max_retries: The `max_retries` parameter in the `send_request_async` function determines the
+    maximum number of retry attempts that will be made if the initial request fails. If the request
+    fails, the function will retry the request up to `max_retries` times before giving up and returning
+    a default response containing, defaults to 3 (optional)
+    :param maxRes: The `maxRes` parameter in the `send_request_async` function represents the maximum
+    number of results to be included in the request payload. This parameter is used when creating the
+    request body to specify the maximum number of results that should be returned by the API in response
+    to the request, defaults to 50 (optional)
+    :param timeout: The `timeout` parameter in the `send_request_async` function specifies the maximum
+    time, in seconds, that the function will wait for a response from the server before considering the
+    request as timed out. If the response is not received within the specified timeout period, an
+    `asyncio.TimeoutError` exception, defaults to 10 (optional)
+    :return: The function `send_request_async` is returning either the response text if the status is
+    200, or a dictionary containing the details of the row if all retries fail.
+    """
     for attempt in range(max_retries):
         try:
             routenpunkte = api_manager.set_routenpunkte_zonenpunkt(row, 'Land_von', 'PLZ_von', 'Land_nach', 'PLZ_nach')
