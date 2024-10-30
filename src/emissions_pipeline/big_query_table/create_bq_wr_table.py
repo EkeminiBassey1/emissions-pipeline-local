@@ -11,6 +11,7 @@ class BigQuery:
     def create_bigquery_table(self):
 
         schema = [
+            bigquery.SchemaField("Client", "STRING", mode="NULLABLE"),
             bigquery.SchemaField("ID", "STRING", mode="NULLABLE"),
             bigquery.SchemaField("Land_von", "STRING", mode="NULLABLE"),
             bigquery.SchemaField("Plz_von", "STRING", mode="NULLABLE"),

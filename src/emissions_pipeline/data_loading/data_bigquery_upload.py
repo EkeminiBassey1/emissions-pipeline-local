@@ -12,7 +12,7 @@ class BigQUpload:
     def __init__(self):
         pass
 
-    def update_base_area_code_kilometrierung_table(self, base_coors_wr_kilometriert: str, url: str, batch_size: int, offset: int = 0):
+    def update_base_area_code_kilometrierung_table(self, base_coors_wr_kilometriert: str, url: str, batch_size: int, client_type:str, offset: int = 0):
         destination_table = f"{PROJECT_ID}.{DATASET_ID}.{base_coors_wr_kilometriert}"
         destination_table_err = f"{PROJECT_ID}.{DATASET_ID}.{ERROR}"
         headers = {
@@ -42,6 +42,7 @@ class BigQUpload:
                 send_requests_async(df_temp, url, headers))
             failed_df = pd.DataFrame(failed_requests)
             df_json_responses = pd.DataFrame(successful_responses)
+            df_json_responses["Client"] = client_type
 
             try:
                 job = client.load_table_from_dataframe(
