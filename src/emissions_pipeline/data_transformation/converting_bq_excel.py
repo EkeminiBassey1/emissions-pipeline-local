@@ -20,8 +20,7 @@ class BQTransformation:
         self.local_file_path = f"{self.file_path_output}/{EXCEL_FILE_NAME}"
         self.p = inflect.engine()
         self.excel_max_row = 999999
-        #ToDo. Fix the table name. So that views of DR and WR can be exported. 
-        
+                
     def transform_bq_table_to_xlsx(self, table:str):
         destination_table = f"{PROJECT_ID}.{DATASET_ID}.{table}"
         query = f"SELECT * FROM `{destination_table}`"
