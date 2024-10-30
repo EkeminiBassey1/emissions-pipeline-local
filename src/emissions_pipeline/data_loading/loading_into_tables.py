@@ -37,7 +37,7 @@ class DataPrep:
     def _step_data_kilometrierung(self):
         logger.info("Step Kilometrierung...")
         self.uploading_to_bq.update_base_area_code_kilometrierung_table(
-            base_coors_wr_kilometriert=BASE_WR_KILOMETRIERT, url=self.url_choosing.get_url(), batch_size=BATCH_SIZE)
+            base_coors_wr_kilometriert=BASE_WR_KILOMETRIERT, url=self.url_choosing.get_url(), batch_size=BATCH_SIZE, client_type=self.url_choosing.get_client())
         self.re_run_errors.re_run_failed_requests(url=self.url_choosing.get_url())
         logger.success("Kilometrierung has been completed!")
 
