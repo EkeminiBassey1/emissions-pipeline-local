@@ -75,8 +75,6 @@ class BQTransformation:
                 .replace("{$offset}", str(offset))
             offset = offset + part_size
             list_parts_query.append(query)
-        else:
-            logger.info("The table has less than 1 Million rows and can be stored in one file!") #ToDo
         return list_parts_query
 
     def _temp_table_to_excel(self, parts_length: int):
