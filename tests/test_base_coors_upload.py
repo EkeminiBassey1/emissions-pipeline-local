@@ -4,7 +4,7 @@ import pandas as pd
 import hashlib
 from loguru import logger
 from google.cloud import bigquery
-from src.emissions_pipeline.data_transformation.base_coors_uploading import loading_bq_table_base_coors
+from src.emissions_pipeline.data_transformation.base_coors_uploading import BaseCoors
 from settings import PROJECT_ID, DATASET_ID, BASE_COORS, CREDENTIALS_PATH
 
 class TestLoadingBQTableBaseCoors(unittest.TestCase):
@@ -22,8 +22,8 @@ class TestLoadingBQTableBaseCoors(unittest.TestCase):
         mock_job = MagicMock()
         mock_job.result.return_value = None
         mock_bigquery_client.return_value.load_table_from_dataframe.return_value = mock_job
-        
-        loading_bq_table_base_coors('test_table')
+        base_coors_uploader = BaseCoors()
+        base_coors_uploader.loading_bq_table_base_coors('test_table')
 
         mock_read_gbq.assert_called_once_with(
             f"SELECT * FROM `{PROJECT_ID}.{DATASET_ID}.test_table`",
