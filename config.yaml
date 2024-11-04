@@ -1,5 +1,5 @@
 project: 
-  project_id: wgs-emission-data-dev
+  project_id: wgs-bassey-sandbox
   dataset_id: emissions_testing
   table_base_coors: base_coors
   table_base_coors_wr_kilometriert: base_coors_wr_kilometriert

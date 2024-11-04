@@ -13,6 +13,19 @@ class ReRun:
         self.upload_base_coors = BaseCoors()
 
     def re_run_failed_requests(self, url: str, client:str):
+        """
+        The function `re_run_failed_requests` checks the error rate for a specific table, and if it exceeds
+        a threshold, it initiates a re-run of calculations with reduced batch sizes until the error rate
+        falls below the threshold.
+        
+        :param url: The `url` parameter in the `re_run_failed_requests` method is a string that represents
+        the URL to be used for uploading data to BigQuery and updating the base area code kilometering table
+        :type url: str
+        :param client: The `client` parameter in the `re_run_failed_requests` method seems to represent the
+        type of client being used for the request. It is likely used within the method to determine how to
+        handle the failed requests and initiate a re-run if necessary
+        :type client: str
+        """
         uploading_to_bq = BigQUpload()
         perccentage_error = self._check_length_error_table()
         new_batch_size = BATCH_SIZE
@@ -34,6 +47,12 @@ class ReRun:
                     break
 
     def _check_length_error_table(self):
+        """
+        The function `_check_length_error_table` calculates the percentage of errors in a dataset by
+        querying the counts of records in two tables.
+        :return: The function `_check_length_error_table` returns the percentage of error records in the
+        table compared to the total number of records in the base table.
+        """
         query_base_wr = f"SELECT count(ID) FROM {PROJECT_ID}.{DATASET_ID}.{BASE_WR_KILOMETRIERT}"
         query_error = f"SELECT count(ID) FROM {PROJECT_ID}.{DATASET_ID}.{ERROR}"
 
@@ -47,6 +66,9 @@ class ReRun:
         return percentage
 
     def _truncate_error_table(self):
+        """
+        The function truncates a specified table in a BigQuery dataset.
+        """
         query = f"TRUNCATE TABLE {PROJECT_ID}.{DATASET_ID}.{ERROR}"
         query_job = self.client.query(query)
         results = query_job.result()

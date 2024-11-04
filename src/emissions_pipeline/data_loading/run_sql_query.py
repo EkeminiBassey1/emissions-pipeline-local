@@ -57,8 +57,10 @@ class RunQueries:
             logger.success(f"Table {PROJECT_ID}.{DATASET_ID}.{name} has been created!")
 
     def create_directRoute_view(self):
-# The code snippet you provided is a method called `create_directRoute_view` within the `RunQueries`
-# class. Here's what it does:
+        """
+        This Python function creates a view for Direct Route by executing a SQL query using parameters like
+        project ID and dataset ID.
+        """
         logger.info("Creating view for Direct Route...")
         query_template = importlib.resources.read_text(queries_alternative_queries, "direct_route_query.sql")
         query = query_template.replace("{$project_id}", PROJECT_ID).replace("{$dataset_id}", DATASET_ID).replace("{$base_coors_wr_kilometriert}", BASE_WR_KILOMETRIERT)

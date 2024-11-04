@@ -23,11 +23,19 @@ class DataPrep:
         self.upload_routen_plz = RoutenPLZ(excel_file_path=input_file_path)
 
     def loading_into_tables(self):
+        """
+        The function `loading_into_tables` calls three private methods to prepare data, calculate
+        kilometrage, and create Excel files.
+        """
         self._step_data_preperation()
         self._step_data_kilometrierung()
         self._step_creating_excel_files()
 
     def _step_data_preperation(self):
+        """
+        The `_step_data_preparation` function logs a message, checks a BigQuery dataset table, runs queries,
+        uploads an Excel file, and loads data into a BigQuery table.
+        """
         logger.info("The step data preparation...")
         self.bq_check.check_dataset_table()
         self.run_queries.run_queries(use_replacements=True, query_type="main")
@@ -36,12 +44,19 @@ class DataPrep:
         logger.success("Step data preparation has been completed!")
 
     def _step_data_kilometrierung(self):
+        """
+        The `_step_data_kilometrierung` function logs a message, updates a table in BigQuery, re-runs failed
+        requests, and logs a success message upon completion.
+        """
         logger.info("Step Kilometrierung...")
         self.uploading_to_bq.update_base_area_code_kilometrierung_table(url=self.url_choosing.get_url(), batch_size=BATCH_SIZE, client_type=self.url_choosing.get_client())
         self.re_run_errors.re_run_failed_requests(url=self.url_choosing.get_url(), client=self.url_choosing.get_client())
         logger.success("Kilometrierung has been completed!")
 
     def _step_creating_excel_files(self):
+        """
+        This function creates views and Excel files based on the route type chosen.
+        """
         logger.info("Step creating view and excel file...")
         if self.url_choosing.get_route_type() == "WR":
             logger.info("Creating view for WalterRoute...")

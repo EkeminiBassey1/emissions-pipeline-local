@@ -1,3 +1,5 @@
+# The above code defines several Pydantic models for representing geographic coordinates, zone points,
+# route points, feature parameters, and a request body structure.
 from typing import List, Optional
 from pydantic import BaseModel
 
