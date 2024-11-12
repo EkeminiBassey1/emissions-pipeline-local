@@ -19,6 +19,7 @@ class BaseCoors:
         represents the name of the BigQuery table from which data will be loaded
         :type TABLE: str
         """
+        logger.info("Loading to base coors...")
         query = f"SELECT * FROM `{PROJECT_ID}.{DATASET_ID}.{TABLE}`"
         df_base_coors = read_gbq(query, project_id=PROJECT_ID, dialect="standard")
         df_base_coors['ID'] = df_base_coors.apply(lambda row: hashlib.md5(

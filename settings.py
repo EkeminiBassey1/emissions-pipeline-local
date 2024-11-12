@@ -5,7 +5,7 @@ import os
 import glob
 
 
-def _load_env_variables(key_file, project_id, dataset_id, base_coors, table_base_coors_wr_kilometriert, table_error, routen_plz, table_view, url_wr, url_dr, error_rate_toleration, batch_size, folder_name, excel_file_name, direct_route_view):
+def _load_env_variables(key_file, project_id, dataset_id, base_coors, table_base_coors_wr_kilometriert, table_error, routen_plz, table_view, url_wr, url_dr, error_rate_toleration, batch_size, folder_name, excel_file_name, direct_route_view, bucket_name, file_name):
     credentials = service_account.Credentials.from_service_account_file(
         key_file,
         scopes=[
@@ -29,7 +29,9 @@ def _load_env_variables(key_file, project_id, dataset_id, base_coors, table_base
         "EXCEL_FILE_NAME": excel_file_name,
         "ERROR_RATE_TOL": error_rate_toleration,
         "CREDENTIALS": credentials,
-        "DIRECT_ROUTE_VIEW":direct_route_view
+        "DIRECT_ROUTE_VIEW":direct_route_view,
+        "BUCKET_NAME": bucket_name,
+        "FILE_NAME": file_name
     }
 
 
@@ -68,7 +70,9 @@ env_config = _load_env_variables(
     batch_size=yaml_config["project"]["batch_size"],
     folder_name=yaml_config["project"]["folder_name"],
     excel_file_name=yaml_config["project"]["excel_file_name"], 
-    direct_route_view=yaml_config["project"]["direct_route_view"]
+    direct_route_view=yaml_config["project"]["direct_route_view"],
+    bucket_name=yaml_config["project"]["bucket_name"],
+    file_name=yaml_config["project"]["file_name"]
 )
 CONFIG = {**yaml_config, **env_config}
 
@@ -87,3 +91,5 @@ FOLDER_NAME = CONFIG.get("FOLDER_NAME")
 EXCEL_FILE_NAME = CONFIG.get("EXCEL_FILE_NAME")
 CREDENTIALS_PATH = CONFIG.get("CREDENTIALS_PATH")
 DIRECT_ROUTE_VIEW = CONFIG.get("DIRECT_ROUTE_VIEW")
+BUCKET_NAME = CONFIG.get("BUCKET_NAME")
+FILE_NAME = CONFIG.get("FILE_NAME")

@@ -1,7 +1,7 @@
 from google.cloud import bigquery
 import pandas as pd
 from loguru import logger
-from settings import PROJECT_ID, DATASET_ID, ROUTEN_PLZ, CREDENTIALS_PATH
+from settings import PROJECT_ID, DATASET_ID, ROUTEN_PLZ, CREDENTIALS_PATH, BUCKET_NAME, FILE_NAME
 
 
 class RoutenPLZ:
@@ -27,3 +27,25 @@ class RoutenPLZ:
             df, destination_table, job_config=job_config)
         job.result()
         logger.success(f"Data has been loaded successfully into {ROUTEN_PLZ}")
+        
+    def loading_into_area_code_bq_table(self):
+        destination_table = f"{PROJECT_ID}.{DATASET_ID}.{ROUTEN_PLZ}"
+        URL = f"gs://{BUCKET_NAME}/{FILE_NAME}"
+        self.client = bigquery.Client(project=PROJECT_ID, credentials=CREDENTIALS_PATH)
+
+        job_config = bigquery.LoadJobConfig(create_disposition="CREATE_NEVER", write_disposition="WRITE_TRUNCATE")
+        column_names = ['Land_von', 'Plz_von', 'Land_nach', 'Plz_nach']
+
+        try:
+            df = pd.read_excel(URL, names=column_names)
+            df = df.astype(str)
+            job = self.client.load_table_from_dataframe(df, destination_table, job_config=job_config)
+            job.result()
+            logger.success(f"Data has been loaded successfully into {ROUTEN_PLZ}")
+        except Exception as e:
+            logger.error(f"Error writing to BigQuery table: {e}")
+
+        #truncate_query = f"TRUNCATE TABLE wgs-emission-data-dev.emissions_testing.base_coors_wr_kilometriert"
+        #query_job = self.client.query(truncate_query)
+        #query_job.result()
+        #print(f"Table base_coors_wr_kilometriert has been truncated successfully.")
