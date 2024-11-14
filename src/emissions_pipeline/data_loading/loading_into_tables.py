@@ -39,8 +39,8 @@ class DataPrep:
         logger.info("The step data preparation...")
         self.bq_check.check_dataset_table()
         self.run_queries.run_queries(use_replacements=True, query_type="main")
-        #self.upload_routen_plz.routen_plz_excle_file_upload()
-        self.upload_routen_plz.loading_into_area_code_bq_table()
+        self.upload_routen_plz.routen_plz_excle_file_upload()
+        #self.upload_routen_plz.loading_into_area_code_bq_table()
         self.upload_base_coors.loading_bq_table_base_coors(TABLE=ROUTEN_PLZ)
         logger.success("Step data preparation has been completed!")
 
