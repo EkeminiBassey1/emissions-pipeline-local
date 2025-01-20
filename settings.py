@@ -1,22 +1,74 @@
 import os
+import sys
 import yaml
 from google.oauth2 import service_account
-import os
-import glob
+import json
+import pyfiglet
+from colorama import init, Fore
+from loguru import logger
 
+init()
 
-def _load_env_variables(key_file, project_id, dataset_id, base_coors, table_base_coors_wr_kilometriert, table_error, routen_plz, table_view, url_wr, url_dr, error_rate_toleration, batch_size, folder_name, excel_file_name, direct_route_view, bucket_name, file_name):
+def validate_and_correct_name(user_input):
+    special_cases = {
+        'ä': 'ae', 'ö': 'oe', 'ü': 'ue',
+        'Ä': 'Ae', 'Ö': 'Oe', 'Ü': 'Ue',
+        'ß': 'ss'
+    }
+
+    for char, replacement in special_cases.items():
+        user_input = user_input.replace(char, replacement)
+
+    corrected_name = ''.join(char for char in user_input if char.isalpha() or char.isspace())
+
+    if not corrected_name.strip():
+        return None
+
+    return corrected_name.strip()
+
+def _get_valid_name():
+    while True:
+        user_name_dataset = input("Please, insert a dataset name: ").lower()
+        corrected_name = validate_and_correct_name(user_name_dataset)
+
+        if corrected_name:
+            logger.info(f"Dataset will be named: emission_{corrected_name}")
+            return corrected_name
+        else:
+            logger.error("Invalid name. Please enter a valid name using only letters and spaces.")
+            
+def display_banner():
+    ascii_banner = pyfiglet.figlet_format("Emissions Pipeline", font="doom")
+
+    print(Fore.GREEN + ascii_banner + Fore.RESET)
+
+    print(Fore.YELLOW + "Emissions Pipeline - Processing Data..." + Fore.RESET)
+    print(Fore.CYAN + "Version: 1.0.0 | Status: Running | Current Process: Carbon Capture" + Fore.RESET)
+    print(Fore.CYAN + "Next Step: Data Analysis | Time Remaining: Estimating..." + Fore.RESET)
+
+def _load_env_variables(base_coors, table_base_coors_wr_kilometriert, table_error, routen_plz, table_view, url_wr, url_dr, error_rate_toleration, batch_size, folder_name, excel_file_name, direct_route_view, bucket_name, file_name):
+    display_banner()
+    print("Starting emissions data processing...\n")
+    
+    key_file_path = input("Please, insert the path of your service account file here: ")
+    user_name_dataset = _get_valid_name()
+    
+    with open(key_file_path, "r") as file:
+        file_content = file.read()
+    
+    service_account_key_file = json.loads(file_content)
+    
     credentials = service_account.Credentials.from_service_account_file(
-        key_file,
-        scopes=[
+        key_file_path,
+        scopes=[ 
             "https://www.googleapis.com/auth/bigquery",
             "https://www.googleapis.com/auth/pubsub",
             "https://www.googleapis.com/auth/cloud-platform"
         ]
     )
     return {
-        "PROJECT_ID": project_id,
-        "DATASET_ID": dataset_id,
+        "PROJECT_ID": service_account_key_file["project_id"],
+        "DATASET_ID": f"emission_{user_name_dataset}",
         "TABLE_BASE_COORS": base_coors,
         "TABLE_BASE_COORS_WR_KILOMETRIERT": table_base_coors_wr_kilometriert,
         "TABLE_ERROR": table_error,
@@ -29,36 +81,42 @@ def _load_env_variables(key_file, project_id, dataset_id, base_coors, table_base
         "EXCEL_FILE_NAME": excel_file_name,
         "ERROR_RATE_TOL": error_rate_toleration,
         "CREDENTIALS": credentials,
-        "DIRECT_ROUTE_VIEW":direct_route_view,
+        "DIRECT_ROUTE_VIEW": direct_route_view,
         "BUCKET_NAME": bucket_name,
         "FILE_NAME": file_name
     }
 
-
-def _get_single_json_filename(folder_path):
-    json_files = glob.glob(os.path.join(folder_path, "*.json"))
-
-    if len(json_files) == 0:
-        raise FileNotFoundError("No JSON file found in the folder.")
-    elif len(json_files) > 1:
-        raise ValueError("More than one JSON file found in the folder.")
-
-    json_file = json_files[0]
-    return json_file
-
+def _get_resource_path(relative_path):
+    """Get the absolute path to a resource, works for dev and PyInstaller."""
+    if hasattr(sys, '_MEIPASS'):  # PyInstaller sets this attribute
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.path.abspath(".")  # Use current directory in development
+    return os.path.join(base_path, relative_path)
 
 def _load_yaml_config(yaml_file):
     with open(yaml_file, 'r', encoding="utf-8") as file:
         return yaml.safe_load(file)
 
+# Check if we are running as a bundled app or script
+if getattr(sys, 'frozen', False):
+    # Running as a PyInstaller executable
+    base_path = sys._MEIPASS
+else:
+    # Running as a script
+    base_path = os.path.dirname(__file__)
 
-key_file = _get_single_json_filename('key_file')
-yaml_config = _load_yaml_config(os.path.join(
-    os.path.dirname(__file__), 'config.yaml'))
+# Path to config.yaml in both cases
+config_path = _get_resource_path('config.yaml')
+
+# Load the YAML config from the correct location
+yaml_config = _load_yaml_config(config_path)
+
+# Path to sql_queries directory
+sql_queries_path = _get_resource_path('src/util/sql_queries')
+logger.debug(f"SQL Queries Path: {sql_queries_path}")
+
 env_config = _load_env_variables(
-    key_file=key_file,
-    project_id=yaml_config["project"]["project_id"],
-    dataset_id=yaml_config["project"]["dataset_id"],
     base_coors=yaml_config["project"]["table_base_coors"],
     table_base_coors_wr_kilometriert=yaml_config["project"]["table_base_coors_wr_kilometriert"],
     table_error=yaml_config["project"]["table_error"],
@@ -74,6 +132,7 @@ env_config = _load_env_variables(
     bucket_name=yaml_config["project"]["bucket_name"],
     file_name=yaml_config["project"]["file_name"]
 )
+
 CONFIG = {**yaml_config, **env_config}
 
 PROJECT_ID = CONFIG.get("PROJECT_ID")

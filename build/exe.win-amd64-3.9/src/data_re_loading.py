@@ -1,0 +1,75 @@
+from pandas_gbq import read_gbq
+from loguru import logger
+from google.cloud import bigquery
+
+from src.emissions_pipeline.data_transformation.base_coors_uploading import BaseCoors
+from src.emissions_pipeline.data_loading.data_bigquery_upload import BigQUpload
+from settings import PROJECT_ID, DATASET_ID, BASE_WR_KILOMETRIERT, ERROR, ERROR_RATE_TOL, BATCH_SIZE, CREDENTIALS_PATH
+
+
+class ReRun:
+    def __init__(self):
+        self.client = bigquery.Client(credentials=CREDENTIALS_PATH, project=PROJECT_ID)
+        self.upload_base_coors = BaseCoors()
+
+    def re_run_failed_requests(self, url: str, client:str):
+        """
+        The function `re_run_failed_requests` checks the error rate for a specific table, and if it exceeds
+        a threshold, it initiates a re-run of calculations with reduced batch sizes until the error rate
+        falls below the threshold.
+        
+        :param url: The `url` parameter in the `re_run_failed_requests` method is a string that represents
+        the URL to be used for uploading data to BigQuery and updating the base area code kilometering table
+        :type url: str
+        :param client: The `client` parameter in the `re_run_failed_requests` method seems to represent the
+        type of client being used for the request. It is likely used within the method to determine how to
+        handle the failed requests and initiate a re-run if necessary
+        :type client: str
+        """
+        uploading_to_bq = BigQUpload()
+        perccentage_error = self._check_length_error_table()
+        new_batch_size = BATCH_SIZE
+        if perccentage_error <= ERROR_RATE_TOL:
+            logger.info(f"The current error rate is {perccentage_error}% for the {ERROR} table. A re-run will not be continued. Calculation has been concluded.")
+        elif perccentage_error >= ERROR_RATE_TOL:
+            logger.info(
+                f"The current error rate  is at {perccentage_error}% for the {ERROR} table. A re-run of the calculation will be initiated now...")
+            logger.info(f"Batch size has been reduced to: {new_batch_size}...")
+            while perccentage_error >= ERROR_RATE_TOL:
+                new_batch_size = int(new_batch_size / 2)
+                self.upload_base_coors.loading_bq_table_base_coors(TABLE=ERROR)
+                self._truncate_error_table()
+                uploading_to_bq.update_base_area_code_kilometrierung_table(batch_size=new_batch_size, url=url, client_type=client)
+                perccentage_error = self._check_length_error_table()
+                logger.info(f"The error rate is now: {perccentage_error}%!")
+                if perccentage_error <= ERROR_RATE_TOL:
+                    logger.info(f"The error rate for the {ERROR} table is currently {perccentage_error}%. A re-run will not proceed, as calculations have been finalized.")
+                    break
+
+    def _check_length_error_table(self):
+        """
+        The function `_check_length_error_table` calculates the percentage of errors in a dataset by
+        querying the counts of records in two tables.
+        :return: The function `_check_length_error_table` returns the percentage of error records in the
+        table compared to the total number of records in the base table.
+        """
+        query_base_wr = f"SELECT count(ID) FROM {PROJECT_ID}.{DATASET_ID}.{BASE_WR_KILOMETRIERT}"
+        query_error = f"SELECT count(ID) FROM {PROJECT_ID}.{DATASET_ID}.{ERROR}"
+
+        df_result = read_gbq(query_base_wr, project_id=PROJECT_ID, dialect="standard")
+        df_error = read_gbq(query_error, project_id=PROJECT_ID, dialect="standard")
+
+        result_variable = df_result.values.squeeze()
+        result_variable_error = df_error.values.squeeze()
+
+        percentage = round((result_variable_error / (result_variable + result_variable_error))*100, 2)
+        return percentage
+
+    def _truncate_error_table(self):
+        """
+        The function truncates a specified table in a BigQuery dataset.
+        """
+        query = f"TRUNCATE TABLE {PROJECT_ID}.{DATASET_ID}.{ERROR}"
+        query_job = self.client.query(query)
+        results = query_job.result()
+        logger.info(f"{ERROR} has been truncated!")
