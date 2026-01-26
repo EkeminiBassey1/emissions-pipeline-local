@@ -20,12 +20,12 @@ class BQTransformation:
         self.local_file_path = f"{self.file_path_output}/{EXCEL_FILE_NAME}"
         self.p = inflect.engine()
         self.excel_max_row = 999999
-                
+
     def transform_bq_table_to_xlsx(self, table:str):
         """
         The function `transform_bq_table_to_xlsx` reads data from a BigQuery table, processes it, and saves
         it to an Excel file, handling cases where the data exceeds a certain row limit.
-        
+
         :param table: The `table` parameter in the `transform_bq_table_to_xlsx` function is a string that
         represents the name of the BigQuery table that you want to transform into an Excel file
         :type table: str
@@ -36,7 +36,7 @@ class BQTransformation:
         df = pandas_gbq.read_gbq(query, project_id=PROJECT_ID, dialect='standard')
         df = df.astype(str)
         df_length = len(df)
-        
+
         logger.info(f"Fetched {df_length} rows from BigQuery table: {destination_table}")
         logger.info("Starting to process BQ table to xlsx...")
 
@@ -55,7 +55,7 @@ class BQTransformation:
         """
         The function `_create_sheet2_for_errors` reads data from a BigQuery table and appends it to an Excel
         sheet named 'Error'.
-        
+
         :param local_file_path: The `local_file_path` parameter in the `_create_sheet2_for_errors` method is
         the file path where you want to save the Excel file containing the error data. This parameter should
         be a string representing the local file path on your system where the Excel file will be created or
@@ -76,7 +76,7 @@ class BQTransformation:
         """
         The function `_create_multiple_queries_excel_files` generates multiple SQL queries for creating
         views in Excel files based on specified parameters.
-        
+
         :param parts_length: The `parts_length` parameter in the `_create_multiple_queries_excel_files`
         method represents the total number of parts or sections into which the data will be divided for
         processing and creating multiple Excel files
@@ -99,7 +99,7 @@ class BQTransformation:
         offset = 0
         query = importlib.resources.read_text(multiple_excel_files, "create_excel_output_view.sql")
         logger.info("Creating the view for the excel files...")
-        
+
         part_size = self._calculating_number_of_excel_files_excel_size(dataframe_length=dataframe_length, return_value="parts")
 
         for i in range(1, parts_length+1):
@@ -118,7 +118,7 @@ class BQTransformation:
     def _temp_table_to_excel(self, parts_length: int):
         """
         This function exports multiple Excel views to Excel files on-premises based on a given parts length.
-        
+
         :param parts_length: The `parts_length` parameter in the `_temp_table_to_excel` method represents
         the number of parts or sections that the data will be divided into when exporting to Excel files.
         This parameter is used in a loop to generate multiple Excel files based on the specified length
@@ -129,10 +129,10 @@ class BQTransformation:
 
         logger.info("Exporting the excel views to excel file on-prem...")
         for i in range(1, parts_length + 1):
-            file_name = f"{EXCEL_FILE_NAME}_{self._number_to_words_with_underscores(i)}"            
+            file_name = f"{EXCEL_FILE_NAME}_{self._number_to_words_with_underscores(i)}"
             query = query_template.replace("{$project_id}", PROJECT_ID).replace(
                 "{$dataset_id}", DATASET_ID).replace("{$excel_file_view_part}", file_name)
-            
+
             df = pandas_gbq.read_gbq(
                 query, project_id=PROJECT_ID, dialect='standard')
             local_file_path = f"{self.file_path_output}/{FOLDER_NAME}/{EXCEL_FILE_NAME}_{i}.xlsx"
@@ -141,7 +141,7 @@ class BQTransformation:
     def _create_new_folder_for_multiple_excel_files(self, file_path: str, name: str):
         """
         This function creates a new folder for multiple Excel files if it does not already exist.
-        
+
         :param file_path: The `file_path` parameter is a string that represents the path where the new
         folder will be created. It should be the directory path where you want to create the new folder
         :type file_path: str
@@ -161,7 +161,7 @@ class BQTransformation:
         """
         The function calculates the number of Excel files needed to store a given amount of data based on
         the maximum number of rows per Excel file.
-        
+
         :param dataframe_length: The `dataframe_length` parameter in the
         `_calculating_number_of_excel_files_excel_size` function represents the total number of rows in a
         DataFrame that you want to split into multiple Excel files based on a maximum row limit
@@ -191,7 +191,7 @@ class BQTransformation:
         """
         This function splits a table with more than 1 million rows into multiple Excel files and saves them
         locally.
-        
+
         :param length: The `length` parameter in the `_more_than_million_rows` method likely represents the
         total number of rows in the table that is being processed. It is used to determine if the table has
         more than 1 million rows and needs to be split into multiple files for storage or processing
@@ -217,7 +217,7 @@ class BQTransformation:
     def _number_to_words_with_underscores(self, number):
         """
         The function converts a number to words and replaces spaces with underscores.
-        
+
         :param number: The function `_number_to_words_with_underscores` takes a number as input and converts
         it to words using the `number_to_words` method from the `self.p` object. It then replaces spaces in
         the resulting words with underscores before returning the modified string

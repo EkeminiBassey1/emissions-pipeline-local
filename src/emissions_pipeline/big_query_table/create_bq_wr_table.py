@@ -19,81 +19,76 @@ class BigQuery:
             bigquery.SchemaField("Plz_von", "STRING", mode="NULLABLE"),
             bigquery.SchemaField("Land_nach", "STRING", mode="NULLABLE"),
             bigquery.SchemaField("Plz_nach", "STRING", mode="NULLABLE"),
-            bigquery.SchemaField("eventTimestamp", "DATETIME", mode="NULLABLE"),
-            bigquery.SchemaField("response", "RECORD", mode="REPEATED", fields=[
-                bigquery.SchemaField("rank", "INTEGER", mode="NULLABLE"),
-                bigquery.SchemaField("walterRoutenInfos", "RECORD", mode="NULLABLE", fields=[
-                    bigquery.SchemaField("walterRoutenId", "INTEGER", mode="NULLABLE"),
-                    bigquery.SchemaField("istBevorzugt", "BOOLEAN", mode="NULLABLE"),
-                    bigquery.SchemaField("laendersperren", "STRING", mode="REPEATED"),
-                    bigquery.SchemaField("beschreibung", "STRING", mode="NULLABLE"),
-                    bigquery.SchemaField("orgEinheit", "STRING", mode="NULLABLE"),
-                    bigquery.SchemaField("geografieVon", "RECORD", mode="NULLABLE", fields=[
-                        bigquery.SchemaField("land", "STRING", mode="NULLABLE"),
-                        bigquery.SchemaField("plzZonen", "STRING", mode="REPEATED"),
-                    ]),
-                    bigquery.SchemaField("geografieNach", "RECORD", mode="NULLABLE", fields=[
-                        bigquery.SchemaField("land", "STRING", mode="NULLABLE"),
-                        bigquery.SchemaField("plzZonen", "STRING", mode="REPEATED"),
-                    ])
-                ]),
-                bigquery.SchemaField("routenPunkte", "RECORD", mode="REPEATED", fields=[
-                    bigquery.SchemaField("laufendeNr", "INTEGER", mode="NULLABLE"),
-                    bigquery.SchemaField("typ", "STRING", mode="NULLABLE"),
-                    bigquery.SchemaField("ursprungKoordinate", "RECORD", mode="NULLABLE", fields=[
-                        bigquery.SchemaField("x", "FLOAT", mode="NULLABLE"),
-                        bigquery.SchemaField("y", "FLOAT", mode="NULLABLE"),
-                    ]),
-                    bigquery.SchemaField("berechneteKoordinate", "RECORD", mode="NULLABLE", fields=[
-                        bigquery.SchemaField("x", "FLOAT", mode="NULLABLE"),
-                        bigquery.SchemaField("y", "FLOAT", mode="NULLABLE"),
-                    ]),
-                    bigquery.SchemaField("fahrzeit", "INTEGER", mode="NULLABLE"),
-                    bigquery.SchemaField("distanzTyp", "STRING", mode="NULLABLE"),
-                    bigquery.SchemaField("distanz", "INTEGER", mode="NULLABLE"),
-                    bigquery.SchemaField("polygon", "STRING", mode="REPEATED"),
-                    bigquery.SchemaField("maut", "RECORD", mode="REPEATED", fields=[
-                        bigquery.SchemaField("landCode", "STRING", mode="NULLABLE"),
-                        bigquery.SchemaField("landName", "STRING", mode="NULLABLE"),
-                        bigquery.SchemaField("kosten", "INTEGER", mode="NULLABLE"),
-                        bigquery.SchemaField("strecke", "INTEGER", mode="NULLABLE"),
-                        bigquery.SchemaField("tollTypes", "RECORD", mode="REPEATED", fields=[
-                            bigquery.SchemaField("tollType", "STRING", mode="NULLABLE"),
-                            bigquery.SchemaField("strecke", "INTEGER", mode="NULLABLE"),
-                            bigquery.SchemaField("kosten", "INTEGER", mode="NULLABLE"),
-                        ])
-                    ]),
-                    bigquery.SchemaField("viaPunkte", "STRING", mode="REPEATED"),
-                    bigquery.SchemaField("land", "STRING", mode="NULLABLE"),
-                    bigquery.SchemaField("ort", "STRING", mode="NULLABLE"),
-                    bigquery.SchemaField("plz", "STRING", mode="NULLABLE"),
-                    bigquery.SchemaField("mnemoKuerzel", "STRING", mode="NULLABLE"),
-                    bigquery.SchemaField("ursprungTyp", "STRING", mode="NULLABLE")
-                ]),
-                bigquery.SchemaField("strassenDistanzGesamt", "FLOAT", mode="NULLABLE"),
-                bigquery.SchemaField("faehreDistanzGesamt", "FLOAT", mode="NULLABLE"),
-                bigquery.SchemaField("bahnDistanzGesamt", "FLOAT", mode="NULLABLE"),
-                bigquery.SchemaField("mautGesamt", "RECORD", mode="REPEATED", fields=[
-                    bigquery.SchemaField("landCode", "STRING", mode="NULLABLE"),
-                    bigquery.SchemaField("landName", "STRING", mode="NULLABLE"),
-                    bigquery.SchemaField("kosten", "FLOAT", mode="NULLABLE"),
-                    bigquery.SchemaField("strecke", "FLOAT", mode="NULLABLE"),
-                    bigquery.SchemaField("tollTypes", "RECORD", mode="REPEATED", fields=[
-                        bigquery.SchemaField("tollType", "STRING", mode="NULLABLE"),
-                        bigquery.SchemaField("strecke", "INTEGER", mode="NULLABLE"),
-                        bigquery.SchemaField("kosten", "INTEGER", mode="NULLABLE"),
-                    ])
-                ]),
-                bigquery.SchemaField("manoeuvres", "INTEGER", mode="REPEATED"),
+            bigquery.SchemaField("EventTimeStamp", "STRING", mode="NULLABLE"),
+            bigquery.SchemaField("info", "RECORD", mode="NULLABLE", fields=[
+                bigquery.SchemaField("totalDistanceInMeters", "FLOAT", mode="NULLABLE"),
+                bigquery.SchemaField("totalStreetDistanceInMeters", "FLOAT", mode="NULLABLE"),
+                bigquery.SchemaField("totalTrainDistanceInMeters", "FLOAT", mode="NULLABLE"),
+                bigquery.SchemaField("totalFerryDistanceInMeters", "FLOAT", mode="NULLABLE"),
+                bigquery.SchemaField("totalTravelTimeInSeconds", "FLOAT", mode="NULLABLE"),
+                bigquery.SchemaField("violated", "BOOLEAN", mode="NULLABLE"),
             ]),
-            bigquery.SchemaField("anzahlGefundenerRouten", "INTEGER", mode="NULLABLE")
+            bigquery.SchemaField("routeSections", "RECORD", mode="REPEATED", fields=[
+                bigquery.SchemaField("fromWaypoint", "RECORD", mode="NULLABLE", fields=[
+                    bigquery.SchemaField("type", "STRING", mode="NULLABLE"),
+                    bigquery.SchemaField("longitude", "FLOAT", mode="NULLABLE"),
+                    bigquery.SchemaField("latitude", "FLOAT", mode="NULLABLE"),
+                    bigquery.SchemaField("address", "RECORD", mode="NULLABLE", fields=[
+                        bigquery.SchemaField("countryIsoCode", "STRING", mode="NULLABLE"),
+                        bigquery.SchemaField("postalCode", "STRING", mode="NULLABLE"),
+                    ]),
+                ]),
+                bigquery.SchemaField("toWaypoint", "RECORD", mode="NULLABLE", fields=[
+                    bigquery.SchemaField("type", "STRING", mode="NULLABLE"),
+                    bigquery.SchemaField("longitude", "FLOAT", mode="NULLABLE"),
+                    bigquery.SchemaField("latitude", "FLOAT", mode="NULLABLE"),
+                    bigquery.SchemaField("address", "RECORD", mode="NULLABLE", fields=[
+                        bigquery.SchemaField("countryIsoCode", "STRING", mode="NULLABLE"),
+                        bigquery.SchemaField("postalCode", "STRING", mode="NULLABLE"),
+                    ]),
+                ]),
+                bigquery.SchemaField("viapoints", "RECORD", mode="REPEATED", fields=[
+                    bigquery.SchemaField("longitude", "FLOAT", mode="NULLABLE"),
+                    bigquery.SchemaField("latitude", "FLOAT", mode="NULLABLE"),
+                    bigquery.SchemaField("address", "RECORD", mode="NULLABLE", fields=[
+                        bigquery.SchemaField("countryIsoCode", "STRING", mode="NULLABLE"),
+                        bigquery.SchemaField("city", "STRING", mode="NULLABLE"),
+                        bigquery.SchemaField("postalCode", "STRING", mode="NULLABLE"),
+                    ]),
+                ]),
+                bigquery.SchemaField("distanceInMeters", "FLOAT", mode="NULLABLE"),
+                bigquery.SchemaField("travelTimeInSeconds", "FLOAT", mode="NULLABLE"),
+                bigquery.SchemaField("travelType", "STRING", mode="NULLABLE"),
+                bigquery.SchemaField("walterRouteInfos", "RECORD", mode="NULLABLE", fields=[
+                    bigquery.SchemaField("id", "INTEGER", mode="NULLABLE"),
+                    bigquery.SchemaField("description", "STRING", mode="NULLABLE"),
+                    bigquery.SchemaField("from", "RECORD", mode="NULLABLE", fields=[
+                        bigquery.SchemaField("isoCountryCode", "STRING", mode="NULLABLE"),
+                        bigquery.SchemaField("postalCodes", "STRING", mode="REPEATED"),
+                    ]),
+                    bigquery.SchemaField("to", "RECORD", mode="NULLABLE", fields=[
+                        bigquery.SchemaField("isoCountryCode", "STRING", mode="NULLABLE"),
+                        bigquery.SchemaField("postalCodes", "STRING", mode="REPEATED"),
+                    ]),
+                    bigquery.SchemaField("isPreferred", "BOOLEAN", mode="NULLABLE"),
+                    bigquery.SchemaField("prohibitedCountries", "STRING", mode="REPEATED"),
+                    bigquery.SchemaField("orgUnit", "STRING", mode="NULLABLE"),
+                ]),
+                bigquery.SchemaField("segments", "STRING", mode="REPEATED"),
+            ]),
+            bigquery.SchemaField("tolls", "RECORD", mode="REPEATED", fields=[
+                bigquery.SchemaField("isoCountryCode", "STRING", mode="NULLABLE"),
+                bigquery.SchemaField("costInEuro", "FLOAT", mode="NULLABLE"),
+                bigquery.SchemaField("distanceInMeters", "FLOAT", mode="NULLABLE"),
+                bigquery.SchemaField("tollType", "STRING", mode="NULLABLE"),
+            ]),
         ]
 
         dataset_ref = self.client.dataset(DATASET_ID)
         table_ref = dataset_ref.table(BASE_WR_KILOMETRIERT)
-        try: 
+        try:
             table = bigquery.Table(table_ref, schema=schema)
             table = self.client.create_table(table)
             logger.success(f"Table {PROJECT_ID}.{DATASET_ID}.{BASE_WR_KILOMETRIERT} created!")
-        except: 
-            logger.error(f"Table {PROJECT_ID}.{DATASET_ID}.{BASE_WR_KILOMETRIERT} could not be created!")
+        except Exception as e:
+            logger.error(f"Table {PROJECT_ID}.{DATASET_ID}.{BASE_WR_KILOMETRIERT} could not be created, because of: {e}")

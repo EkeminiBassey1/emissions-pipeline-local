@@ -18,11 +18,11 @@ class RoutenPLZ:
         df = pd.read_excel(self.excel_file_path, dtype={'PLZ_von': str, 'PLZ_nach': str})
         required_columns = ['Land_von', 'PLZ_von', 'Land_nach', 'PLZ_nach']
 
-        if set(required_columns) != set(df.columns):
-            df.columns = required_columns
-            logger.info("Inserted the columns as the first row")
-        else:
-            logger.info("Columns already exist, skipping insertion")
+        # Select only the required columns if they exist
+        if not set(required_columns).issubset(df.columns):
+            raise ValueError(f"Excel file must contain columns: {required_columns}")
+
+        df = df[required_columns]
 
         df['PLZ_von'] = df['PLZ_von'].astype(str)
         df['PLZ_nach'] = df['PLZ_nach'].astype(str)
@@ -35,7 +35,7 @@ class RoutenPLZ:
             df, destination_table, job_config=job_config)
         job.result()
         logger.success(f"Data has been loaded successfully into {ROUTEN_PLZ}")
-        
+
     def loading_into_area_code_bq_table(self):
         destination_table = f"{PROJECT_ID}.{DATASET_ID}.{ROUTEN_PLZ}"
         URL = f"gs://{BUCKET_NAME}/{FILE_NAME}"

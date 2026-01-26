@@ -5,35 +5,33 @@ from pydantic import BaseModel
 
 
 class Koordinaten(BaseModel):
-    x: float
-    y: float
+    longitude: float
+    latitude: float
 
 
 class Zonenpunkte(BaseModel):
-    land: str
-    plzZone: str
+    countryIsoCode: str
+    postalCode: str
 
 
 class Routenpunkte_zonenpunkt(BaseModel):
-    typ: str
-    zonenpunkt: Optional[Zonenpunkte] = None
-
+    address: Optional[Zonenpunkte] = None
 
 class Routenpunkte_koordinaten(BaseModel):
-    typ: str
     koordinaten: Optional[Koordinaten] = None
 
 
 class FeatureParameter(BaseModel):
     polygon: bool
-    fahrzeit: bool
-    maut: bool
-
+    tollInformation: bool
+    maneuverEvents: bool
+    maneuverEventsLanguage: str
+    archive: bool
+    routeSegments: bool
 
 class RequestBody(BaseModel):
-    archive: bool
-    routenpunkte: List
-    orgeinheit: Optional[int] = None
+    waypoints: List
+    orgUnit: Optional[int] = None
+    features: FeatureParameter
     maxResults: Optional[int] = None
-    featureParameter: FeatureParameter
     laendersperren: Optional[str] = None

@@ -3,18 +3,26 @@ import json
 
 import aiohttp
 from loguru import logger
+from requests.auth import HTTPBasicAuth
 
 from src.emissions_pipeline.api_request_handler.apiRequestManager import ApiRequestManager
-from src.emissions_pipeline.api_request_handler.preparing_area_code_dataframe import uploading_area_code_dataframe 
+from src.emissions_pipeline.api_request_handler.preparing_area_code_dataframe import uploading_area_code_dataframe
 
 api_manager = ApiRequestManager()
-featureparameter = api_manager.set_featureParameter(maut=True)
+featureparameter = api_manager.set_featureParameter(
+                                                    tollInformation=True,
+                                                    polygon=False,
+                                                    maneuverEvents=False,
+                                                    maneuverEventsLanguage="DE",
+                                                    archive=False,
+                                                    routeSegments=False
+                                                    )
 
 async def send_request_async(session, url, headers, row, max_retries=3, maxRes=50, timeout=10):
     """
     This Python async function sends a POST request with retries and timeouts, handling different
     response statuses.
-    
+
     :param session: The `session` parameter in the `send_request_async` function is an aiohttp
     ClientSession object that represents a connection pool for making HTTP requests asynchronously. It
     allows you to make HTTP requests using async/await syntax in Python
@@ -47,9 +55,17 @@ async def send_request_async(session, url, headers, row, max_retries=3, maxRes=5
         try:
             routenpunkte = api_manager.set_routenpunkte_zonenpunkt(row, 'Land_von', 'PLZ_von', 'Land_nach', 'PLZ_nach')
             request_data = api_manager.create_request_body(routenpunkte, featureparameter, maxResults=maxRes)
-            json_payload = json.loads(api_manager.convert_request(request_data))
+            request_raw = api_manager.convert_request(request_data)
+            json_payload = json.loads(request_raw)
 
-            async with session.post(url, json=json_payload, headers=headers, timeout=timeout) as response:
+            auth = aiohttp.BasicAuth("rout-test", "SUvrfpMtYjtZ")
+
+            headers_II = {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            }
+
+            async with session.post(url, json=json_payload, headers=headers_II, auth=auth, timeout=timeout) as response:
                 if response.status == 200:
                     return await response.text()
                 else:

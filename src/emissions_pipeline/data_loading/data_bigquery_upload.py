@@ -19,7 +19,7 @@ class BigQUpload:
         """
         The function `update_base_area_code_kilometrierung_table` uploads data from a dataframe to BigQuery
         in batches, handling successful and failed requests accordingly.
-        
+
         :param base_coors_wr_kilometriert: The `base_coors_wr_kilometriert` parameter in the
         `update_base_area_code_kilometrierung_table` function is a string representing the name of a table
         in BigQuery where the base coordinates with kilometers are stored. This table will be used as the
