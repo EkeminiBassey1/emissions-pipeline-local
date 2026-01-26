@@ -3,21 +3,28 @@ import os
 from datetime import datetime
 
 import requests
-from loguru import logger
 
 from src.emissions_pipeline.model.request_body import RequestBody, FeatureParameter
 from src.emissions_pipeline.model.request_body import Routenpunkte_zonenpunkt, Routenpunkte_koordinaten
 from src.emissions_pipeline.model.request_body import Koordinaten, Zonenpunkte
 from settings import URL_WR, URL_DR
 
-
 class ApiRequestManager:
     def __init__(self):
         pass
 
-    def set_featureParameter(self, polygon: bool = False, fahrzeit: bool = True, maut: bool = True) -> dict:
+    def set_featureParameter(self, archive:bool, routeSegments:bool, maneuverEventsLanguage:str, polygon: bool = False, maneuverEvents: bool = True, tollInformation: bool = True) -> dict:
         featureParameter_dict = {
-            "featureParameter": vars(FeatureParameter(polygon=polygon, fahrzeit=fahrzeit, maut=maut))}
+            "features": vars(FeatureParameter(
+                                                polygon=polygon,
+                                                maneuverEvents=maneuverEvents,
+                                                tollInformation=tollInformation,
+                                                maneuverEventsLanguage=maneuverEventsLanguage,
+                                                archive=archive,
+                                                routeSegments=routeSegments
+                                            )
+                            )
+            }
         return featureParameter_dict
 
     def _key_remove(self, liste: list, key_remove):
@@ -27,21 +34,15 @@ class ApiRequestManager:
 
     def set_routenpunkte_zonenpunkt(self, row, column_1: str, column_2: str, column_3: str, column_4: str):
         routenpunkte_list = [
-            vars(Routenpunkte_zonenpunkt(typ="WegPunkt",
-                                         zonenpunkt=Zonenpunkte(land=str(row[column_1]),
-                                                                plzZone=str(row[column_2])))),
-            vars(Routenpunkte_zonenpunkt(typ="WegPunkt",
-                                         zonenpunkt=Zonenpunkte(land=str(row[column_3]),
-                                                                plzZone=str(row[column_4]))))
+            vars(Routenpunkte_zonenpunkt(address=Zonenpunkte(countryIsoCode=str(row[column_1]), postalCode=str(row[column_2])))),
+            vars(Routenpunkte_zonenpunkt(address=Zonenpunkte(countryIsoCode=str(row[column_3]), postalCode=str(row[column_4]))))
         ]
         return routenpunkte_list
 
     def set_routenpunkte_koordinaten(self, row, column_1: str, column_2: str, column_3: str, column_4: str):
         routenpunkte_list = [
-            vars(Routenpunkte_koordinaten(typ="WegPunkt",
-                                          koordinaten=Koordinaten(x=float(row[column_1]), y=float(row[column_2])))),
-            vars(Routenpunkte_koordinaten(typ="WegPunkt",
-                                          koordinaten=Koordinaten(x=float(row[column_3]), y=float(row[column_4])))),
+            vars(Routenpunkte_koordinaten(koordinaten=Koordinaten(x=float(row[column_1]), y=float(row[column_2])))),
+            vars(Routenpunkte_koordinaten(koordinaten=Koordinaten(x=float(row[column_3]), y=float(row[column_4])))),
         ]
         return routenpunkte_list
 
@@ -52,23 +53,22 @@ class ApiRequestManager:
             dataframe["ORGEINHEIT"][0] = None
         pass
 
-    def create_request_body(self, routenpunkte: list, featureparameter: dict, archive: bool = False,
-                            org_einheit: int = None, maxResults: int = 1, laendersperren: bool = None,
-                            manoeuvres: bool = None, routensegmente: bool = None):
+    def create_request_body(self, waypoints: list, features: dict, orgUnit: int = None, maxResults: int = 1,
+                            laendersperren: bool = None, manoeuvres: bool = None, routensegmente: bool = None):
 
         feature_parameter_instance = FeatureParameter(
-            **featureparameter['featureParameter'])
+            **features['features'])
 
         request_body = RequestBody(
-            archive=archive,
-            routenpunkte=routenpunkte,
-            orgeinheit=org_einheit,
+            waypoints=waypoints,
+            orgUnit=orgUnit,
             maxResults=maxResults,
             laendersperren=laendersperren,
             manoeuvres=manoeuvres,
             routensegmente=routensegmente,
-            featureParameter=feature_parameter_instance,
+            features=feature_parameter_instance,
         )
+
         return request_body
 
     def set_header_with_url(self, url):
@@ -91,8 +91,7 @@ class ApiRequestManager:
         blob.content_type = 'text/plain'
 
     def convert_request(self, request_data):
-        request_data_json = json.dumps(request_data.dict())
-        return request_data_json
+        return json.dumps(request_data.dict())
 
     def set_MaxResults(self, url):
         if url == URL_WR:
