@@ -1,4 +1,5 @@
 venv
+.venv
 key_file/*
 !key_file/.gitkeep
 __pycache__/
