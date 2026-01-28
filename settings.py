@@ -36,7 +36,7 @@ def _get_valid_name():
             return corrected_name
         else:
             logger.error("Invalid name. Please enter a valid name using only letters and spaces.")
-            
+
 def display_banner():
     ascii_banner = pyfiglet.figlet_format("Emissions Pipeline", font="doom")
 
@@ -46,21 +46,21 @@ def display_banner():
     print(Fore.CYAN + "Version: 1.0.0 | Status: Running | Current Process: Carbon Capture" + Fore.RESET)
     print(Fore.CYAN + "Next Step: Data Analysis | Time Remaining: Estimating..." + Fore.RESET)
 
-def _load_env_variables(base_coors, table_base_coors_wr_kilometriert, table_error, routen_plz, table_view, url_wr, url_dr, error_rate_toleration, batch_size, folder_name, excel_file_name, direct_route_view, bucket_name, file_name):
+def _load_env_variables(base_coors, table_base_coors_wr_kilometriert, table_error, routen_plz, table_view, url_wr, url_dr, error_rate_toleration, batch_size, folder_name, excel_file_name, direct_route_view, bucket_name, file_name, user, password):
     display_banner()
     print("Starting emissions data processing...\n")
-    
+
     key_file_path = input("Please, insert the path of your service account file here: ")
     user_name_dataset = _get_valid_name()
-    
+
     with open(key_file_path, "r") as file:
         file_content = file.read()
-    
+
     service_account_key_file = json.loads(file_content)
-    
+
     credentials = service_account.Credentials.from_service_account_file(
         key_file_path,
-        scopes=[ 
+        scopes=[
             "https://www.googleapis.com/auth/bigquery",
             "https://www.googleapis.com/auth/pubsub",
             "https://www.googleapis.com/auth/cloud-platform"
@@ -83,7 +83,9 @@ def _load_env_variables(base_coors, table_base_coors_wr_kilometriert, table_erro
         "CREDENTIALS": credentials,
         "DIRECT_ROUTE_VIEW": direct_route_view,
         "BUCKET_NAME": bucket_name,
-        "FILE_NAME": file_name
+        "FILE_NAME": file_name,
+        "USER": user,
+        "PASSWORD": password
     }
 
 def _get_resource_path(relative_path):
@@ -127,10 +129,12 @@ env_config = _load_env_variables(
     error_rate_toleration=yaml_config["project"]["error_rate_toleration"],
     batch_size=yaml_config["project"]["batch_size"],
     folder_name=yaml_config["project"]["folder_name"],
-    excel_file_name=yaml_config["project"]["excel_file_name"], 
+    excel_file_name=yaml_config["project"]["excel_file_name"],
     direct_route_view=yaml_config["project"]["direct_route_view"],
     bucket_name=yaml_config["project"]["bucket_name"],
-    file_name=yaml_config["project"]["file_name"]
+    file_name=yaml_config["project"]["file_name"],
+    user=yaml_config["project"]["user"],
+    password=yaml_config["project"]["password"]
 )
 
 CONFIG = {**yaml_config, **env_config}
@@ -152,3 +156,5 @@ CREDENTIALS_PATH = CONFIG.get("CREDENTIALS_PATH")
 DIRECT_ROUTE_VIEW = CONFIG.get("DIRECT_ROUTE_VIEW")
 BUCKET_NAME = CONFIG.get("BUCKET_NAME")
 FILE_NAME = CONFIG.get("FILE_NAME")
+USER = CONFIG.get("USER")
+PASSWORD = CONFIG.get("PASSWORD")

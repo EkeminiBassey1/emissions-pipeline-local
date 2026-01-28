@@ -5,12 +5,14 @@ project:
   table_error: error_base_coors_wr_kilometriert
   table_view: base_coors_wr_kilometriert_excel_file
   batch_size: 100
-  error_rate_toleration: 15
+  error_rate_toleration: 10
   folder_name: multiple_excel_file_output
   direct_route_view: base_coors_wr_kilometriert_direct_route_view
   excel_file_name: output_file.xlsx
   bucket_name: area_code_bucket
   file_name: area_code_file.xlsx
+  user: rout-prod
+  password: rdw6ybcpa6qe
 url:
-  wr_url_direct_route: https://rout-routes2-cmp.test.lkw-walter.com/rout-routes2-cmp/v2/api/calculateDirectRoute
-  wr_url_walter_route: https://rout-routes2-cmp.test.lkw-walter.com/rout-routes2-cmp/v2/api/calculateWalterRoute
+  wr_url_direct_route: http://rout-routes2-cmp.prod.lkw-walter.com/rout-routes2-cmp/v2/api/calculateDirectRoute
+  wr_url_walter_route: http://rout-routes2-cmp.prod.lkw-walter.com/rout-routes2-cmp/v2/api/calculateWalterRoute
