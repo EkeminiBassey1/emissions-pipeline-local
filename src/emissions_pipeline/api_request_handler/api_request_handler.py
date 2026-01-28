@@ -4,7 +4,7 @@ import json
 import aiohttp
 from loguru import logger
 from requests.auth import HTTPBasicAuth
-
+from settings import  USER, PASSWORD
 from src.emissions_pipeline.api_request_handler.apiRequestManager import ApiRequestManager
 from src.emissions_pipeline.api_request_handler.preparing_area_code_dataframe import uploading_area_code_dataframe
 
@@ -58,7 +58,7 @@ async def send_request_async(session, url, headers, row, max_retries=3, maxRes=5
             request_raw = api_manager.convert_request(request_data)
             json_payload = json.loads(request_raw)
 
-            auth = aiohttp.BasicAuth("rout-test", "SUvrfpMtYjtZ")
+            auth = aiohttp.BasicAuth(USER, PASSWORD)
 
             headers_II = {
                 "Accept": "application/json",

@@ -3,6 +3,7 @@ import asyncio
 import pandas as pd
 from loguru import logger
 from pandas_gbq import read_gbq
+import json
 from google.cloud import bigquery
 from settings import PROJECT_ID, DATASET_ID, BASE_COORS, BASE_WR_KILOMETRIERT, ERROR, CREDENTIALS_PATH
 from src.emissions_pipeline.api_request_handler.api_request_handler import send_requests_async
@@ -68,6 +69,18 @@ class BigQUpload:
             df_json_responses = pd.DataFrame(successful_responses)
             df_json_responses["Client"] = client_type
 
+            col_name = next((c for c in ["RouteSections", "routeSections"] if c in df_json_responses.columns), None)
+
+            if col_name is not None:
+                df_json_responses[col_name] = df_json_responses[col_name].apply(
+                    lambda x: json.dumps(x) if x is not None else None
+                )
+
+                df_json_responses.rename(columns={col_name: "routeSections"}, inplace=True)
+            else:
+                df_json_responses["routeSections"] = None
+                logger.warning("Spalte RouteSections wurde im Response nicht gefunden - erstelle leere Spalte.")
+
             try:
                 job = self.client.load_table_from_dataframe(df_json_responses, self.destination_table, job_config=job_config)
                 job.result()
@@ -99,3 +112,24 @@ class BigQUpload:
                 f"Dataframe from {offset} to {offset + batch_size} has been completed!")
             offset += batch_size
         logger.success("Calculations have been uploaded successfully!")
+
+    def sanitize_for_bigquery(self, sections):
+        if not isinstance(sections, list):
+            return sections
+
+        for section in sections:
+            walter = section.get("walterRouteInfos")
+            if isinstance(walter, dict):
+                for direction_key in ["from", "to"]:
+                    direction = walter.get(direction_key)
+                    if isinstance(direction, dict) and "postalCodes" in direction:
+                        direction["postalCodes"] = [str(pc) for pc in direction["postalCodes"]]
+
+            if "viapoints" not in section or section["viapoints"] is None:
+                section["viapoints"] = []
+            else:
+                for vp in section["viapoints"]:
+                    addr = vp.get("address")
+                    if isinstance(addr, dict) and "postalCode" in addr:
+                        addr["postalCode"] = str(addr["postalCode"])
+        return sections
