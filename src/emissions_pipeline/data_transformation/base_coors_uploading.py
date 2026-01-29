@@ -3,12 +3,12 @@ import hashlib
 from google.cloud import bigquery
 from loguru import logger
 from pandas_gbq import read_gbq
-from settings import PROJECT_ID, DATASET_ID, BASE_COORS
+from settings import PROJECT_ID, DATASET_ID, BASE_COORS, CREDENTIALS_PATH
 
 class BaseCoors:
     def __init__(self):
         self.destination_table_base_coors = f'{PROJECT_ID}.{DATASET_ID}.{BASE_COORS}'
-        self.client = bigquery.Client(project=PROJECT_ID)
+        self.client = bigquery.Client(credentials=CREDENTIALS_PATH, project=PROJECT_ID)
     
     def loading_bq_table_base_coors(self, TABLE: str):
         """

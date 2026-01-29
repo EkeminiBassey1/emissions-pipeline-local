@@ -50,7 +50,7 @@ def _load_env_variables(base_coors, table_base_coors_wr_kilometriert, table_erro
     display_banner()
     print("Starting emissions data processing...\n")
 
-    key_file_path = input("Please, insert the path of your service account file here: ")
+    key_file_path = input("Please, insert the path...: ").strip().replace("'", "").replace('"', "")
     user_name_dataset = _get_valid_name()
 
     with open(key_file_path, "r") as file:
@@ -80,7 +80,7 @@ def _load_env_variables(base_coors, table_base_coors_wr_kilometriert, table_erro
         "FOLDER_NAME": folder_name,
         "EXCEL_FILE_NAME": excel_file_name,
         "ERROR_RATE_TOL": error_rate_toleration,
-        "CREDENTIALS": credentials,
+        "CREDENTIALS_PATH": credentials,
         "DIRECT_ROUTE_VIEW": direct_route_view,
         "BUCKET_NAME": bucket_name,
         "FILE_NAME": file_name,
